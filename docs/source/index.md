@@ -1,4 +1,4 @@
-Chip8 in python3
+Rsj217's Blog
 =====================================
 ```{eval-rst}
 .. toctree::

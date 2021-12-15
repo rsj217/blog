@@ -17,7 +17,7 @@ sys.path.insert(0, os.path.abspath('../..'))
 
 # -- Project information -----------------------------------------------------
 
-project = 'chip8-py3'
+project = 'Blog'
 copyright = '2021, rsj217'
 author = 'rsj217'
 

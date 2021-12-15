@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Tutorial &#8212; chip8-py3 0.0.1 文档</title>
+    <title>Home &#8212; Blog 0.0.1 文档</title>
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
     <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
@@ -15,8 +15,8 @@
     <script src="../_static/translations.js"></script>
     <link rel="index" title="索引" href="../genindex.html" />
     <link rel="search" title="搜索" href="../search.html" />
-    <link rel="next" title="图解 Rust Ownership — Copy 与 Move 语义" href="01-rust-ownership-copy-move-clone.html" />
-    <link rel="prev" title="Chip8 in python3" href="../index.html" />
+    <link rel="next" title="浅析Rust所有权Ownership (二) – Copy Move Clone 与 Borrow" href="02-rust-ownership-copy-move-clone-borrow.html" />
+    <link rel="prev" title="Rsj217’s Blog" href="../index.html" />
    
   <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
   
@@ -33,11 +33,39 @@
 
           <div class="body" role="main">
             
-  <div class="tex2jax_ignore mathjax_ignore section" id="tutorial">
-<h1>Tutorial<a class="headerlink" href="#tutorial" title="永久链接至标题">¶</a></h1>
+  <div class="tex2jax_ignore mathjax_ignore section" id="home">
+<h1>Home<a class="headerlink" href="#home" title="永久链接至标题">¶</a></h1>
 <div class="toctree-wrapper compound">
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="01-rust-ownership-copy-move-clone.html">图解 Rust Ownership  — Copy 与 Move 语义</a></li>
+<li class="toctree-l1"><a class="reference internal" href="02-rust-ownership-copy-move-clone-borrow.html">浅析Rust所有权Ownership (二) – Copy Move Clone 与 Borrow</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="02-rust-ownership-copy-move-clone-borrow.html#copy">Copy 语义</a></li>
+<li class="toctree-l2"><a class="reference internal" href="02-rust-ownership-copy-move-clone-borrow.html#move">Move 语义</a></li>
+<li class="toctree-l2"><a class="reference internal" href="02-rust-ownership-copy-move-clone-borrow.html#clone">Clone 语义</a></li>
+<li class="toctree-l2"><a class="reference internal" href="02-rust-ownership-copy-move-clone-borrow.html#borrow">Borrow 借用</a></li>
+<li class="toctree-l2"><a class="reference internal" href="02-rust-ownership-copy-move-clone-borrow.html#lifetime">Lifetime 生存期</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="02-rust-ownership-copy-move-clone-borrow.html#copy-move-clone">Copy Move Clone 总结</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="02-rust-ownership-copy-move-clone-borrow.html#id1">Borrow 内存布局</a></li>
+<li class="toctree-l2"><a class="reference internal" href="02-rust-ownership-copy-move-clone-borrow.html#copy-move-clone-trait">Copy Move Clone 与 Trait</a></li>
+<li class="toctree-l2"><a class="reference internal" href="02-rust-ownership-copy-move-clone-borrow.html#id2">总结</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="01-rust-ownership-stack-heap-bind.html">浅析Rust所有权Ownership (一) – 栈堆与位置绑定</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="01-rust-ownership-stack-heap-bind.html#id1">内存</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="01-rust-ownership-stack-heap-bind.html#id2">分页</a></li>
+<li class="toctree-l3"><a class="reference internal" href="01-rust-ownership-stack-heap-bind.html#id3">分段</a></li>
+<li class="toctree-l3"><a class="reference internal" href="01-rust-ownership-stack-heap-bind.html#stack-heap">Stack 与 Heap</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="01-rust-ownership-stack-heap-bind.html#ownership">Ownership</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="01-rust-ownership-stack-heap-bind.html#id4">位置与值</a></li>
+<li class="toctree-l3"><a class="reference internal" href="01-rust-ownership-stack-heap-bind.html#id5">位置与胖指针</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="01-rust-ownership-stack-heap-bind.html#id6">总结</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="00-hello-world.html">Hello World</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="00-hello-world.html#id1">Hello World</a></li>
 </ul>
@@ -53,7 +81,7 @@
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
-<h1 class="logo"><a href="../index.html">chip8-py3</a></h1>
+<h1 class="logo"><a href="../index.html">Blog</a></h1>
 
 
 
@@ -65,8 +93,9 @@
 <h3>导航</h3>
 <p class="caption"><span class="caption-text">Contents:</span></p>
 <ul class="current">
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Tutorial</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="01-rust-ownership-copy-move-clone.html">图解 Rust Ownership  — Copy 与 Move 语义</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Home</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="02-rust-ownership-copy-move-clone-borrow.html">浅析Rust所有权Ownership (二) – Copy Move Clone 与 Borrow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="01-rust-ownership-stack-heap-bind.html">浅析Rust所有权Ownership (一) – 栈堆与位置绑定</a></li>
 <li class="toctree-l2"><a class="reference internal" href="00-hello-world.html">Hello World</a></li>
 </ul>
 </li>
@@ -76,8 +105,8 @@
 <h3>Related Topics</h3>
 <ul>
   <li><a href="../index.html">Documentation overview</a><ul>
-      <li>Previous: <a href="../index.html" title="上一章">Chip8 in python3</a></li>
-      <li>Next: <a href="01-rust-ownership-copy-move-clone.html" title="下一章">图解 Rust Ownership  — Copy 与 Move 语义</a></li>
+      <li>Previous: <a href="../index.html" title="上一章">Rsj217’s Blog</a></li>
+      <li>Next: <a href="02-rust-ownership-copy-move-clone-borrow.html" title="下一章">浅析Rust所有权Ownership (二) – Copy Move Clone 与 Borrow</a></li>
   </ul></li>
 </ul>
 </div>
