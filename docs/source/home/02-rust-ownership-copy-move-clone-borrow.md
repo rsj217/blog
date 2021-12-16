@@ -51,16 +51,15 @@ fn main() {
 ```rust
 fn main() {
     let d1 = vec![1, 2, 3];
-    println!("d1({:p})={:?}", &d1, d1); // d1(0x7ffee049f120)=[1, 2, 3]
+    println!("d1({:p})={:?} d1.ptr({:p})={:p}", &d1, d1, &d1.as_ptr(), d1.as_ptr()); // d1(0x7ffee049f120)=[1, 2, 3] d1.ptr(0x7ffeebb18128)=0x7f8a2fc05c20
     println!("d1.0({:p})={:?} d1.1({:p})={:?} d1.2({:p})={:?}", &d1[0], d1[0], &d1[1], d1[1], &d1[2], d1[2]); // d1.0(0x7fc471c05c20)=1 d1.1(0x7fc471c05c24)=2 d1.2(0x7fc471c05c28)=3
 
 
     let d2 = d1;
-    println!("d2({:p})={:?}", &d2, d2); // d2(0x7ffee049f278)=[1, 2, 3]
+    println!("d2({:p})={:?} d2.ptr({:p})={:p}", &d2, d2, &d2.as_ptr(), d2.as_ptr()); // d2(0x7ffee049f278)=[1, 2, 3] d2.ptr(0x7ffeebb182c8)=0x7f8a2fc05c20
     println!("d2.0({:p})={:?} d2.1({:p})={:?} d2.2({:p})={:?}", &d2[0], d2[0], &d2[1], d2[1], &d2[2], d2[2]); // d2.0(0x7fc471c05c20)=1 d2.1(0x7fc471c05c24)=2 d2.2(0x7fc471c05c28)=3
-
-    // println!("{:?}", d1); //  borrow of moved value: `d1`
 }
+
 ```
 
 ```{image} ../img/move1.png
@@ -164,6 +163,7 @@ rust 进行了高度抽象，我们知道有胖指针管理 heap 内存就可以
 :alt: summary
 :align: center
 ```
+
 
 ## Borrow 内存布局
 
