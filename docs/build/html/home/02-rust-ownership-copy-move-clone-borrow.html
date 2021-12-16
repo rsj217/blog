@@ -1,39 +1,193 @@
+<!doctype html>
+<html class="no-js" lang="zh_CN">
+  <head><meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <meta name="color-scheme" content="light dark"><link rel="index" title="索引" href="../genindex.html" /><link rel="search" title="搜索" href="../search.html" /><link rel="next" title="浅析Rust所有权Ownership (一) – 栈堆与位置绑定" href="01-rust-ownership-stack-heap-bind.html" /><link rel="prev" title="Home" href="index.html" />
 
-<!DOCTYPE html>
+    <meta name="generator" content="sphinx-4.3.1, furo 2021.11.23"/>
+        <title>浅析Rust所有权Ownership (二) – Copy Move Clone 与 Borrow - Blog 0.0.1 文档</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?digest=7f0192ddeb2adecfbaa87ffbcf67d16358b30bc1" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?digest=0af69da206d614734f649b27d4cdc2dd6c31f41d" />
+    
+    
 
-<html lang="zh_CN">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>浅析Rust所有权Ownership (二) – Copy Move Clone 与 Borrow &#8212; Blog 0.0.1 文档</title>
-    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
-    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
-    <script src="../_static/jquery.js"></script>
-    <script src="../_static/underscore.js"></script>
-    <script src="../_static/doctools.js"></script>
-    <script src="../_static/translations.js"></script>
-    <link rel="index" title="索引" href="../genindex.html" />
-    <link rel="search" title="搜索" href="../search.html" />
-    <link rel="next" title="浅析Rust所有权Ownership (一) – 栈堆与位置绑定" href="01-rust-ownership-stack-heap-bind.html" />
-    <link rel="prev" title="Home" href="index.html" />
-   
-  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+
+<style>
+  body {
+    --color-code-background: #f8f8f8;
+  --color-code-foreground: black;
+  
+  }
+  body[data-theme="dark"] {
+    --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+  }
+  @media (prefers-color-scheme: dark) {
+    body:not([data-theme="light"]) {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+  }
+</style></head>
+  <body>
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <path stroke="none" d="M0 0h24v24H0z" />
+      <line x1="4" y1="6" x2="20" y2="6" />
+      <line x1="10" y1="12" x2="20" y2="12" />
+      <line x1="6" y1="18" x2="20" y2="18" />
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-half" viewBox="0 0 24 24">
+    <title>Auto light/dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-shadow">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M13 12h5" />
+      <path d="M13 15h4" />
+      <path d="M13 18h1" />
+      <path d="M13 9h4" />
+      <path d="M13 6h1" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc">
+<label class="overlay sidebar-overlay" for="__navigation">
+  <div class="visually-hidden">Hide navigation sidebar</div>
+</label>
+<label class="overlay toc-overlay" for="__toc">
+  <div class="visually-hidden">Hide table of contents sidebar</div>
+</label>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <div class="visually-hidden">Toggle site navigation sidebar</div>
+        <i class="icon"><svg><use href="#svg-menu"></use></svg></i>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../index.html"><div class="brand">Blog 0.0.1 文档</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle">
+          <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+          <svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <div class="visually-hidden">Toggle table of contents sidebar</div>
+        <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../index.html">
   
   
-  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
-
-  </head><body>
+  <span class="sidebar-brand-text">Blog 0.0.1 文档</span>
   
+</a><form class="sidebar-search-container" method="get" action="../search.html" role="search">
+  <input class="sidebar-search" placeholder=搜索 name="q" aria-label="搜索">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current has-children"><a class="reference internal" href="index.html">Home</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
+<li class="toctree-l2 current current-page"><a class="current reference internal" href="#">浅析Rust所有权Ownership (二) – Copy Move Clone 与 Borrow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="01-rust-ownership-stack-heap-bind.html">浅析Rust所有权Ownership (一) – 栈堆与位置绑定</a></li>
+<li class="toctree-l2"><a class="reference internal" href="00-hello-world.html">Hello World</a></li>
+</ul>
+</li>
+</ul>
 
-    <div class="document">
-      <div class="documentwrapper">
-        <div class="bodywrapper">
-          
-
-          <div class="body" role="main">
-            
-  <div class="tex2jax_ignore mathjax_ignore section" id="rustownership-copy-move-clone-borrow">
+</div>
+</div>
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <div class="content-icon-container">
+          <div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle">
+              <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+              <svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <div class="visually-hidden">Toggle table of contents sidebar</div>
+            <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+          </label>
+        </div>
+        <article role="main">
+          <div class="tex2jax_ignore mathjax_ignore section" id="rustownership-copy-move-clone-borrow">
 <h1>浅析Rust所有权Ownership (二) – Copy Move Clone 与 Borrow<a class="headerlink" href="#rustownership-copy-move-clone-borrow" title="永久链接至标题">¶</a></h1>
 <p>Rust 位置与值绑定，涉及四种语义： Copy Move Clone Borrow 。本文对这些进行图示浅析。</p>
 <div class="section" id="copy">
@@ -41,27 +195,27 @@
 <p>下面一段代码：</p>
 <div class="highlight-rust notranslate"><div class="highlight"><pre><span></span><span class="k">fn</span> <span class="nf">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
 <span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">v1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">5</span><span class="p">;</span><span class="w"></span>
-<span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">&quot;v1({:p})={:?}&quot;</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">v1</span><span class="p">,</span><span class="w"> </span><span class="n">v1</span><span class="p">);</span><span class="w"> </span><span class="c1">// v1(0x7ffeec69d164)=5</span>
+<span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">"v1({:p})={:?}"</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">v1</span><span class="p">,</span><span class="w"> </span><span class="n">v1</span><span class="p">);</span><span class="w"> </span><span class="c1">// v1(0x7ffeec69d164)=5</span>
 
 <span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">v2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">&amp;</span><span class="n">v1</span><span class="p">;</span><span class="w"></span>
-<span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">&quot;v2({:p})={:p}&quot;</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">v2</span><span class="p">,</span><span class="w"> </span><span class="n">v2</span><span class="p">);</span><span class="w"> </span><span class="c1">// v2(0x7ffeec69d1d0)=0x7ffeec69d164</span>
+<span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">"v2({:p})={:p}"</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">v2</span><span class="p">,</span><span class="w"> </span><span class="n">v2</span><span class="p">);</span><span class="w"> </span><span class="c1">// v2(0x7ffeec69d1d0)=0x7ffeec69d164</span>
 
 <span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">v3</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">&amp;</span><span class="n">v1</span><span class="p">;</span><span class="w"></span>
-<span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">&quot;v3({:p})={:p}&quot;</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">v3</span><span class="p">,</span><span class="w"> </span><span class="n">v3</span><span class="p">);</span><span class="w"> </span><span class="c1">// v3(0x7ffeec69d240)=0x7ffeec69d164</span>
+<span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">"v3({:p})={:p}"</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">v3</span><span class="p">,</span><span class="w"> </span><span class="n">v3</span><span class="p">);</span><span class="w"> </span><span class="c1">// v3(0x7ffeec69d240)=0x7ffeec69d164</span>
 
 <span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">v4</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">v2</span><span class="p">;</span><span class="w"></span>
-<span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">&quot;v4({:p})={:p}&quot;</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">v4</span><span class="p">,</span><span class="w"> </span><span class="n">v4</span><span class="p">);</span><span class="w"> </span><span class="c1">// v4(0x7ffeec69d2b0)=0x7ffeec69d164</span>
+<span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">"v4({:p})={:p}"</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">v4</span><span class="p">,</span><span class="w"> </span><span class="n">v4</span><span class="p">);</span><span class="w"> </span><span class="c1">// v4(0x7ffeec69d2b0)=0x7ffeec69d164</span>
 
 <span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">v5</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">&amp;</span><span class="n">v2</span><span class="p">;</span><span class="w"></span>
-<span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">&quot;v5({:p})={:p} {:p}&quot;</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">v5</span><span class="p">,</span><span class="w"> </span><span class="n">v5</span><span class="p">,</span><span class="w"> </span><span class="o">*</span><span class="n">v5</span><span class="p">);</span><span class="w"> </span><span class="c1">// v5(0x7ffeec69d320)=0x7ffeec69d1d0 0x7ffeec69d164</span>
+<span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">"v5({:p})={:p} {:p}"</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">v5</span><span class="p">,</span><span class="w"> </span><span class="n">v5</span><span class="p">,</span><span class="w"> </span><span class="o">*</span><span class="n">v5</span><span class="p">);</span><span class="w"> </span><span class="c1">// v5(0x7ffeec69d320)=0x7ffeec69d1d0 0x7ffeec69d164</span>
 
 <span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">v6</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">v1</span><span class="p">;</span><span class="w"></span>
-<span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">&quot;v6({:p})={:?}&quot;</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">v6</span><span class="p">,</span><span class="w"> </span><span class="n">v6</span><span class="p">);</span><span class="w"> </span><span class="c1">// v6(0x7ffeec69d3ac)=5</span>
+<span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">"v6({:p})={:?}"</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">v6</span><span class="p">,</span><span class="w"> </span><span class="n">v6</span><span class="p">);</span><span class="w"> </span><span class="c1">// v6(0x7ffeec69d3ac)=5</span>
 <span class="p">}</span><span class="w"></span>
 </pre></div>
 </div>
 <p>运行之后，打印的值放到了对应的 println! 的注释中，不同的机器运行结果会不一样。先关注 v1 和 v6 两个位置。</p>
-<img alt="copy" class="align-center" src="../_images/copy.png" />
+<img alt="copy" class="align-center" src="../_images/copy.png"/>
 <p><code class="docutils literal notranslate"><span class="pre">let</span> <span class="pre">v1</span> <span class="pre">=</span> <span class="pre">5;</span></code> 在 stack 上创建了一个位置 v1。其值是 5。stack上地址是 <code class="docutils literal notranslate"><span class="pre">0x7ffeec69d164</span></code>。
 <code class="docutils literal notranslate"><span class="pre">let</span> <span class="pre">v6</span> <span class="pre">=</span> <span class="pre">v1;</span></code> 也在 stack 上创建了一个位置 v6，其值也是 5。这个值是来自 v1 的值进行按位复制得到，也就是将 v1 内存的 5 拷贝到 v6 的内存位置。v1 和 v6 各自对其值有所有权。两者相互没有影响，各自离开作用域的时候，释放各自的值。</p>
 <p>这种把 stack 上的值按位复制创建新的值的称之为 Copy 语义。Copy 就是把原值复制一遍，粘贴到新的地方。</p>
@@ -74,23 +228,21 @@
 <p>再看另外一段代码：</p>
 <div class="highlight-rust notranslate"><div class="highlight"><pre><span></span><span class="k">fn</span> <span class="nf">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
 <span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">d1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="fm">vec!</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">];</span><span class="w"></span>
-<span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">&quot;d1({:p})={:?}&quot;</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">d1</span><span class="p">,</span><span class="w"> </span><span class="n">d1</span><span class="p">);</span><span class="w"> </span><span class="c1">// d1(0x7ffee049f120)=[1, 2, 3]</span>
-<span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">&quot;d1.0({:p})={:?} d1.1({:p})={:?} d1.2({:p})={:?}&quot;</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">d1</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="w"> </span><span class="n">d1</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="w"> </span><span class="o">&amp;</span><span class="n">d1</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="w"> </span><span class="n">d1</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="w"> </span><span class="o">&amp;</span><span class="n">d1</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span><span class="w"> </span><span class="n">d1</span><span class="p">[</span><span class="mi">2</span><span class="p">]);</span><span class="w"> </span><span class="c1">// d1.0(0x7fc471c05c20)=1 d1.1(0x7fc471c05c24)=2 d1.2(0x7fc471c05c28)=3</span>
+<span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">"d1({:p})={:?} d1.ptr({:p})={:p}"</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">d1</span><span class="p">,</span><span class="w"> </span><span class="n">d1</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">d1</span><span class="p">.</span><span class="n">as_ptr</span><span class="p">(),</span><span class="w"> </span><span class="n">d1</span><span class="p">.</span><span class="n">as_ptr</span><span class="p">());</span><span class="w"> </span><span class="c1">// d1(0x7ffee049f120)=[1, 2, 3] d1.ptr(0x7ffeebb18128)=0x7f8a2fc05c20</span>
+<span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">"d1.0({:p})={:?} d1.1({:p})={:?} d1.2({:p})={:?}"</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">d1</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="w"> </span><span class="n">d1</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="w"> </span><span class="o">&amp;</span><span class="n">d1</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="w"> </span><span class="n">d1</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="w"> </span><span class="o">&amp;</span><span class="n">d1</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span><span class="w"> </span><span class="n">d1</span><span class="p">[</span><span class="mi">2</span><span class="p">]);</span><span class="w"> </span><span class="c1">// d1.0(0x7fc471c05c20)=1 d1.1(0x7fc471c05c24)=2 d1.2(0x7fc471c05c28)=3</span>
 
 
 <span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">d2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">d1</span><span class="p">;</span><span class="w"></span>
-<span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">&quot;d2({:p})={:?}&quot;</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">d2</span><span class="p">,</span><span class="w"> </span><span class="n">d2</span><span class="p">);</span><span class="w"> </span><span class="c1">// d2(0x7ffee049f278)=[1, 2, 3]</span>
-<span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">&quot;d2.0({:p})={:?} d2.1({:p})={:?} d2.2({:p})={:?}&quot;</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">d2</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="w"> </span><span class="n">d2</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="w"> </span><span class="o">&amp;</span><span class="n">d2</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="w"> </span><span class="n">d2</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="w"> </span><span class="o">&amp;</span><span class="n">d2</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span><span class="w"> </span><span class="n">d2</span><span class="p">[</span><span class="mi">2</span><span class="p">]);</span><span class="w"> </span><span class="c1">// d2.0(0x7fc471c05c20)=1 d2.1(0x7fc471c05c24)=2 d2.2(0x7fc471c05c28)=3</span>
-
-<span class="w">    </span><span class="c1">// println!(&quot;{:?}&quot;, d1); //  borrow of moved value: `d1`</span>
+<span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">"d2({:p})={:?} d2.ptr({:p})={:p}"</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">d2</span><span class="p">,</span><span class="w"> </span><span class="n">d2</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">d2</span><span class="p">.</span><span class="n">as_ptr</span><span class="p">(),</span><span class="w"> </span><span class="n">d2</span><span class="p">.</span><span class="n">as_ptr</span><span class="p">());</span><span class="w"> </span><span class="c1">// d2(0x7ffee049f278)=[1, 2, 3] d2.ptr(0x7ffeebb182c8)=0x7f8a2fc05c20</span>
+<span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">"d2.0({:p})={:?} d2.1({:p})={:?} d2.2({:p})={:?}"</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">d2</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="w"> </span><span class="n">d2</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="w"> </span><span class="o">&amp;</span><span class="n">d2</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="w"> </span><span class="n">d2</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="w"> </span><span class="o">&amp;</span><span class="n">d2</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span><span class="w"> </span><span class="n">d2</span><span class="p">[</span><span class="mi">2</span><span class="p">]);</span><span class="w"> </span><span class="c1">// d2.0(0x7fc471c05c20)=1 d2.1(0x7fc471c05c24)=2 d2.2(0x7fc471c05c28)=3</span>
 <span class="p">}</span><span class="w"></span>
 </pre></div>
 </div>
-<img alt="move1" class="align-center" src="../_images/move1.png" />
-<p><code class="docutils literal notranslate"><span class="pre">let</span> <span class="pre">d1</span> <span class="pre">=</span> <span class="pre">vec![1,</span> <span class="pre">2,</span> <span class="pre">3];</span></code> 会在 stack 上创建一个位置 d1(0x7ffee049f120)，其值是一个 胖指针，姑且称之为 <code class="docutils literal notranslate"><span class="pre">Vec</span></code>。Vec有一个指针，姑且称之为 <code class="docutils literal notranslate"><span class="pre">Vec.ptr</span></code>，指向了 heap 上的一段位置 data，data存储了 <code class="docutils literal notranslate"><span class="pre">[1,</span> <span class="pre">2,</span> <span class="pre">3]</span></code>的值。data的地址都是在heap上。</p>
-<img alt="move2" class="align-center" src="../_images/move2.png" />
+<img alt="move1" class="align-center" src="../_images/move1.png"/>
+<p><code class="docutils literal notranslate"><span class="pre">let</span> <span class="pre">d1</span> <span class="pre">=</span> <span class="pre">vec![1,</span> <span class="pre">2,</span> <span class="pre">3];</span></code> 会在 stack 上创建一个位置 d1(0x7ffee049f120)，其值是一个 胖指针，姑且称之为 <code class="docutils literal notranslate"><span class="pre">Vec</span></code>。Vec有一个指针，姑且称之为 <code class="docutils literal notranslate"><span class="pre">Vec.ptr</span></code>(0x7ffeebb18128)，指向了 heap 上的一段位置 data(0x7f8a2fc05c20)，data存储了 <code class="docutils literal notranslate"><span class="pre">[1,</span> <span class="pre">2,</span> <span class="pre">3]</span></code>的值。data的地址都是在heap上。</p>
+<img alt="move2" class="align-center" src="../_images/move2.png"/>
 <p><code class="docutils literal notranslate"><span class="pre">let</span> <span class="pre">d2</span> <span class="pre">=</span> <span class="pre">d1;</span></code> 表达式，也是在 stack 上创建了一个位置 d2(0x7ffee049f278), 其值也是一个 胖指针， 是 <code class="docutils literal notranslate"><span class="pre">Vec</span></code> 胖指针按位复制得到的新的胖指针，姑且称之为 <code class="docutils literal notranslate"><span class="pre">Vec'</span></code>。</p>
-<p>那么此时的<code class="docutils literal notranslate"><span class="pre">Vec'.ptr</span></code> 和 <code class="docutils literal notranslate"><span class="pre">Vec.ptr</span></code>的值一样，都指向了 data 这个数据。按照其他语言的做法，data 就有两个指针。而 Rust 在创建 d2 和 <code class="docutils literal notranslate"><span class="pre">Vec'</span></code>之后，之前的 d1 和 <code class="docutils literal notranslate"><span class="pre">Vec</span></code> 将会失效。即 d1 的值移动到了 d2 里。这就是相对于 Copy 的 Move 语义。</p>
+<p>那么此时的<code class="docutils literal notranslate"><span class="pre">Vec'.ptr</span></code>(0x7ffeebb182c8) 和 <code class="docutils literal notranslate"><span class="pre">Vec.ptr</span></code>(0x7ffeebb18128)的值一样，都指向了 data(0x7f8a2fc05c20) 这个数据。按照其他语言的做法，data 就有两个指针。而 Rust 在创建 d2 和 <code class="docutils literal notranslate"><span class="pre">Vec'</span></code>之后，之前的 d1 和 <code class="docutils literal notranslate"><span class="pre">Vec</span></code> 将会失效。即 d1 的值移动到了 d2 里。这就是相对于 Copy 的 Move 语义。</p>
 <p>顾名思义，Copy 是拷贝，原值和新值都存在，Move 是移动，原值被移动到新值的地方。</p>
 </div>
 <div class="section" id="clone">
@@ -105,35 +257,35 @@
 <span class="m">6</span>  <span class="p">|</span>     <span class="nb">let</span> <span class="nv">d2</span> <span class="o">=</span> d1<span class="p">;</span>
    <span class="p">|</span>              -- value moved here
 ...
-<span class="m">10</span> <span class="p">|</span>     println!<span class="o">(</span><span class="s2">&quot;{:?}&quot;</span>, d1<span class="o">)</span><span class="p">;</span>
+<span class="m">10</span> <span class="p">|</span>     println!<span class="o">(</span><span class="s2">"{:?}"</span>, d1<span class="o">)</span><span class="p">;</span>
    <span class="p">|</span>                      ^^ value borrowed here after move
 </pre></div>
 </div>
 <p>想要修复这个错误，一种方法是修改代码如下：</p>
 <div class="highlight-rust notranslate"><div class="highlight"><pre><span></span><span class="k">fn</span> <span class="nf">main</span><span class="p">(){</span><span class="w"></span>
 <span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">d1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="fm">vec!</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">];</span><span class="w"></span>
-<span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">&quot;d1({:p})={:?}&quot;</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">d1</span><span class="p">,</span><span class="w"> </span><span class="n">d1</span><span class="p">);</span><span class="w"> </span><span class="c1">// d1(0x7ffee049f120)=[1, 2, 3]</span>
-<span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">&quot;d1.0({:p})={:?} d1.1({:p})={:?} d1.2({:p})={:?}&quot;</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">d1</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="w"> </span><span class="n">d1</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="w"> </span><span class="o">&amp;</span><span class="n">d1</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="w"> </span><span class="n">d1</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="w"> </span><span class="o">&amp;</span><span class="n">d1</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span><span class="w"> </span><span class="n">d1</span><span class="p">[</span><span class="mi">2</span><span class="p">]);</span><span class="w"> </span><span class="c1">// d1.0(0x7fc471c05c20)=1 d1.1(0x7fc471c05c24)=2 d1.2(0x7fc471c05c28)=3</span>
+<span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">"d1({:p})={:?}"</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">d1</span><span class="p">,</span><span class="w"> </span><span class="n">d1</span><span class="p">);</span><span class="w"> </span><span class="c1">// d1(0x7ffee049f120)=[1, 2, 3]</span>
+<span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">"d1.0({:p})={:?} d1.1({:p})={:?} d1.2({:p})={:?}"</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">d1</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="w"> </span><span class="n">d1</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="w"> </span><span class="o">&amp;</span><span class="n">d1</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="w"> </span><span class="n">d1</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="w"> </span><span class="o">&amp;</span><span class="n">d1</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span><span class="w"> </span><span class="n">d1</span><span class="p">[</span><span class="mi">2</span><span class="p">]);</span><span class="w"> </span><span class="c1">// d1.0(0x7fc471c05c20)=1 d1.1(0x7fc471c05c24)=2 d1.2(0x7fc471c05c28)=3</span>
 
 
 <span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">d2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">d1</span><span class="p">.</span><span class="n">clone</span><span class="p">();</span><span class="w"></span>
-<span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">&quot;d2({:p})={:?}&quot;</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">d2</span><span class="p">,</span><span class="w"> </span><span class="n">d2</span><span class="p">);</span><span class="w"> </span><span class="c1">// d2(0x7ffee049f278)=[1, 2, 3]</span>
-<span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">&quot;d2.0({:p})={:?} d2.1({:p})={:?} d2.2({:p})={:?}&quot;</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">d2</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="w"> </span><span class="n">d2</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="w"> </span><span class="o">&amp;</span><span class="n">d2</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="w"> </span><span class="n">d2</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="w"> </span><span class="o">&amp;</span><span class="n">d2</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span><span class="w"> </span><span class="n">d2</span><span class="p">[</span><span class="mi">2</span><span class="p">]);</span><span class="w"> </span><span class="c1">// d2.0(0x7f8ccc405c30)=1 d2.1(0x7f8ccc405c34)=2 d2.2(0x7f8ccc405c38)=3</span>
+<span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">"d2({:p})={:?}"</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">d2</span><span class="p">,</span><span class="w"> </span><span class="n">d2</span><span class="p">);</span><span class="w"> </span><span class="c1">// d2(0x7ffee049f278)=[1, 2, 3]</span>
+<span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">"d2.0({:p})={:?} d2.1({:p})={:?} d2.2({:p})={:?}"</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">d2</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="w"> </span><span class="n">d2</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="w"> </span><span class="o">&amp;</span><span class="n">d2</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="w"> </span><span class="n">d2</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="w"> </span><span class="o">&amp;</span><span class="n">d2</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span><span class="w"> </span><span class="n">d2</span><span class="p">[</span><span class="mi">2</span><span class="p">]);</span><span class="w"> </span><span class="c1">// d2.0(0x7f8ccc405c30)=1 d2.1(0x7f8ccc405c34)=2 d2.2(0x7f8ccc405c38)=3</span>
 
-<span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">&quot;{:?}&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">d1</span><span class="p">);</span><span class="w"> </span><span class="c1">//</span>
+<span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">"{:?}"</span><span class="p">,</span><span class="w"> </span><span class="n">d1</span><span class="p">);</span><span class="w"> </span><span class="c1">//</span>
 <span class="p">}</span><span class="w"></span>
 </pre></div>
 </div>
 <p>clone 方法，不是 Copy 那种按位复制的浅复制，而是深复制。stack 上的值进行按位复制，stack上关联的 heap 的数据也进行递归复制。如下图所示：</p>
-<img alt="clone" class="align-center" src="../_images/clone.png" />
-<p>通过上述代码示例，我们了解到在位置绑定的时候，rust 的 i32 执行的是 Copy 语义，Vec<i32> 则执行的是 Move 语义。什么结构执行 Copy? 什么结构执行 Move? Rust 不仅提供了默认的规则，同时也提供了 Copy 和 Clone 两个 Trait 进行定制。具体将会在后面论述。</p>
+<img alt="clone" class="align-center" src="../_images/clone.png"/>
+<p>通过上述代码示例，我们了解到在位置绑定的时候，rust 的 i32 执行的是 Copy 语义，Vec<i32> 则执行的是 Move 语义。什么结构执行 Copy? 什么结构执行 Move? Rust 不仅提供了默认的规则，同时也提供了 Copy 和 Clone 两个 Trait 进行定制。具体将会在后面论述。</i32></p>
 </div>
 <div class="section" id="borrow">
 <h2>Borrow 借用<a class="headerlink" href="#borrow" title="永久链接至标题">¶</a></h2>
 <p>Clone 可以让 Vec 这样的数据结构进行深复制。heap 上的内存复制，如果数据量比较大，这样的 Clone 还是比较耗时以及浪费内容空间。对于 stack 上多个位置共享一个 heap 内存数据，Rust 提供了借用语义(Borrow)。借用 使用地址操作符<code class="docutils literal notranslate"><span class="pre">&amp;</span></code>，与其他语言取地址的语义类似。例如Golang使用<code class="docutils literal notranslate"><span class="pre">&amp;</span></code>取地址，通过地址可以读取内存上的值。使用<code class="docutils literal notranslate"><span class="pre">&amp;</span></code>的变量是一个指针，也可以称之为引用(Reference)。</p>
-<img alt="ref3" class="align-center" src="../_images/fat-pointer.png" />
+<img alt="ref3" class="align-center" src="../_images/fat-pointer.png"/>
 <p>从上图可以看出，stack 有多个变量引用了 heap 上的数据。悬垂指针的一个问题就在于多个引用同时存在的时候，释放的时机不对。rust 解决这个问题的思路依然是借助 Ownership。即将上面的对 aa 对 A 引用。换成 aa 对 a 的引用。</p>
-<img alt="ref3" class="align-center" src="../_images/borrow.png" />
+<img alt="ref3" class="align-center" src="../_images/borrow.png"/>
 <p>位置 a 对 A 有引用。通过前文栈 堆的介绍。a 持有 A 的所有权。新创建的位置 aa，不是直接对 A 进行引用。而是对 a 进行借用。借用和引用的最大区别在于，借用不会有所有权。即 A 依然属于 a，而不是属于 aa。</p>
 <p>这样当 aa 释放的时候，因为它没有持有 A，所以也不需要释放 A。当 a 出栈的时候，a 持有 A，因此 a 负责释放 A。</p>
 <blockquote>
@@ -149,7 +301,7 @@
 <h3>Copy Move Clone 总结<a class="headerlink" href="#copy-move-clone" title="永久链接至标题">¶</a></h3>
 <p>从前文的描述，我们知道了 Copy 语义，Move 语义和 Clone 语义。他们的差别在于 stack 上新位置创建的时候，stack 上的值如何处理，heap上的值又是如何处理。并且 heap 上的值是通过stack上的胖指针进行管理的。</p>
 <p>rust 进行了高度抽象，我们知道有胖指针管理 heap 内存就可以。实际编码中，从所有权角度，可以把 堆 栈 看成一体。这里有利于理解上述语义行为， 总结如下图：</p>
-<img alt="summary" class="align-center" src="../_images/summary.png" />
+<img alt="summary" class="align-center" src="../_images/summary.png"/>
 </div>
 </div>
 <div class="section" id="id1">
@@ -157,27 +309,27 @@
 <p>了解了 copy move 和 clone 语义之后。下面对借用进行举例。因为 heap 上的内存实际上是 stack 上的胖指针，其 borrow 语义原理一样，下面就不做特别说明，只使用 i32 类型举例。再回看开篇的代码</p>
 <div class="highlight-rust notranslate"><div class="highlight"><pre><span></span><span class="k">fn</span> <span class="nf">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
 <span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">v1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">5</span><span class="p">;</span><span class="w"></span>
-<span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">&quot;v1({:p})={:?}&quot;</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">v1</span><span class="p">,</span><span class="w"> </span><span class="n">v1</span><span class="p">);</span><span class="w"> </span><span class="c1">// v1(0x7ffeec69d164)=5</span>
+<span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">"v1({:p})={:?}"</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">v1</span><span class="p">,</span><span class="w"> </span><span class="n">v1</span><span class="p">);</span><span class="w"> </span><span class="c1">// v1(0x7ffeec69d164)=5</span>
 
 <span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">v2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">&amp;</span><span class="n">v1</span><span class="p">;</span><span class="w"></span>
-<span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">&quot;v2({:p})={:p}&quot;</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">v2</span><span class="p">,</span><span class="w"> </span><span class="n">v2</span><span class="p">);</span><span class="w"> </span><span class="c1">// v2(0x7ffeec69d1d0)=0x7ffeec69d164</span>
+<span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">"v2({:p})={:p}"</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">v2</span><span class="p">,</span><span class="w"> </span><span class="n">v2</span><span class="p">);</span><span class="w"> </span><span class="c1">// v2(0x7ffeec69d1d0)=0x7ffeec69d164</span>
 
 <span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">v3</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">&amp;</span><span class="n">v1</span><span class="p">;</span><span class="w"></span>
-<span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">&quot;v3({:p})={:p}&quot;</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">v3</span><span class="p">,</span><span class="w"> </span><span class="n">v3</span><span class="p">);</span><span class="w"> </span><span class="c1">// v3(0x7ffeec69d240)=0x7ffeec69d164</span>
+<span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">"v3({:p})={:p}"</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">v3</span><span class="p">,</span><span class="w"> </span><span class="n">v3</span><span class="p">);</span><span class="w"> </span><span class="c1">// v3(0x7ffeec69d240)=0x7ffeec69d164</span>
 
 <span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">v4</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">v2</span><span class="p">;</span><span class="w"></span>
-<span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">&quot;v4({:p})={:p}&quot;</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">v4</span><span class="p">,</span><span class="w"> </span><span class="n">v4</span><span class="p">);</span><span class="w"> </span><span class="c1">// v4(0x7ffeec69d2b0)=0x7ffeec69d164</span>
+<span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">"v4({:p})={:p}"</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">v4</span><span class="p">,</span><span class="w"> </span><span class="n">v4</span><span class="p">);</span><span class="w"> </span><span class="c1">// v4(0x7ffeec69d2b0)=0x7ffeec69d164</span>
 
 <span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">v5</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">&amp;</span><span class="n">v2</span><span class="p">;</span><span class="w"></span>
-<span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">&quot;v5({:p})={:p} {:p}&quot;</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">v5</span><span class="p">,</span><span class="w"> </span><span class="n">v5</span><span class="p">,</span><span class="w"> </span><span class="o">*</span><span class="n">v5</span><span class="p">);</span><span class="w"> </span><span class="c1">// v5(0x7ffeec69d320)=0x7ffeec69d1d0 0x7ffeec69d164</span>
+<span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">"v5({:p})={:p} {:p}"</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">v5</span><span class="p">,</span><span class="w"> </span><span class="n">v5</span><span class="p">,</span><span class="w"> </span><span class="o">*</span><span class="n">v5</span><span class="p">);</span><span class="w"> </span><span class="c1">// v5(0x7ffeec69d320)=0x7ffeec69d1d0 0x7ffeec69d164</span>
 
 <span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">v6</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">v1</span><span class="p">;</span><span class="w"></span>
-<span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">&quot;v6({:p})={:?}&quot;</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">v6</span><span class="p">,</span><span class="w"> </span><span class="n">v6</span><span class="p">);</span><span class="w"> </span><span class="c1">// v6(0x7ffeec69d3ac)=5</span>
+<span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">"v6({:p})={:?}"</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">v6</span><span class="p">,</span><span class="w"> </span><span class="n">v6</span><span class="p">);</span><span class="w"> </span><span class="c1">// v6(0x7ffeec69d3ac)=5</span>
 <span class="p">}</span><span class="w"></span>
 </pre></div>
 </div>
 <p>其内存布局图可以理解如下：</p>
-<img alt="borrow-demo" class="align-center" src="../_images/borrow-demo.png" />
+<img alt="borrow-demo" class="align-center" src="../_images/borrow-demo.png"/>
 <p>从图示可以看出，v1 是最早创建的位置，其值为 5。v2， v3，v4 都是对 v1 的borrow，它们的值都是 v1 的位置，即 stack 内存地址。v5 的值是 v2 的地址，相当于对 v1 的隔代借用。打印 v5 的时候，rust会智能的帮我们找到 v1 的值。v6 是 v1 的拷贝。</p>
 <p>v1 是 值 5 的所有者。v2，v3，v4，v5 都是直接或间接对 v1 的借用，它们都没有 值5 的所有权。v6是v1的copy，它有其拷贝后的值的所有权，跟v1还无关系。</p>
 </div>
@@ -195,80 +347,85 @@
 </div>
 </div>
 
-
-          </div>
-          
-        </div>
+        </article>
       </div>
-      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
-        <div class="sphinxsidebarwrapper">
-<h1 class="logo"><a href="../index.html">Blog</a></h1>
+      <footer>
+        
+        <div class="related-pages">
+          <a class="next-page" href="01-rust-ownership-stack-heap-bind.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title">浅析Rust所有权Ownership (一) – 栈堆与位置绑定</div>
+              </div>
+              <svg><use href="#svg-arrow-right"></use></svg>
+            </a>
+          <a class="prev-page" href="index.html">
+              <svg><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">Home</div>
+                
+              </div>
+            </a>
+        </div>
 
-
-
-
-
-
-
-
-<h3>导航</h3>
-<p class="caption"><span class="caption-text">Contents:</span></p>
-<ul class="current">
-<li class="toctree-l1 current"><a class="reference internal" href="index.html">Home</a><ul class="current">
-<li class="toctree-l2 current"><a class="current reference internal" href="#">浅析Rust所有权Ownership (二) – Copy Move Clone 与 Borrow</a></li>
-<li class="toctree-l2"><a class="reference internal" href="01-rust-ownership-stack-heap-bind.html">浅析Rust所有权Ownership (一) – 栈堆与位置绑定</a></li>
-<li class="toctree-l2"><a class="reference internal" href="00-hello-world.html">Hello World</a></li>
+        <div class="related-information">
+              Copyright &#169; 2021, rsj217 |
+          Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+          <a href="https://github.com/pradyunsg/furo">Furo theme</a>.
+            | <a class="muted-link" href="../_sources/home/02-rust-ownership-copy-move-clone-borrow.md.txt"
+               rel="nofollow">
+              显示源代码
+            </a>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            目录
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">浅析Rust所有权Ownership (二) – Copy Move Clone 与 Borrow</a><ul>
+<li><a class="reference internal" href="#copy">Copy 语义</a></li>
+<li><a class="reference internal" href="#move">Move 语义</a></li>
+<li><a class="reference internal" href="#clone">Clone 语义</a></li>
+<li><a class="reference internal" href="#borrow">Borrow 借用</a></li>
+<li><a class="reference internal" href="#lifetime">Lifetime 生存期</a><ul>
+<li><a class="reference internal" href="#copy-move-clone">Copy Move Clone 总结</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#id1">Borrow 内存布局</a></li>
+<li><a class="reference internal" href="#copy-move-clone-trait">Copy Move Clone 与 Trait</a></li>
+<li><a class="reference internal" href="#id2">总结</a></li>
 </ul>
 </li>
 </ul>
 
-<div class="relations">
-<h3>Related Topics</h3>
-<ul>
-  <li><a href="../index.html">Documentation overview</a><ul>
-  <li><a href="index.html">Home</a><ul>
-      <li>Previous: <a href="index.html" title="上一章">Home</a></li>
-      <li>Next: <a href="01-rust-ownership-stack-heap-bind.html" title="下一章">浅析Rust所有权Ownership (一) – 栈堆与位置绑定</a></li>
-  </ul></li>
-  </ul></li>
-</ul>
-</div>
-<div id="searchbox" style="display: none" role="search">
-  <h3 id="searchlabel">快速搜索</h3>
-    <div class="searchformwrapper">
-    <form class="search" action="../search.html" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" />
-      <input type="submit" value="转向" />
-    </form>
-    </div>
-</div>
-<script>$('#searchbox').show(0);</script>
-
-
-
-
-
-
-
-
+          </div>
         </div>
       </div>
-      <div class="clearer"></div>
-    </div>
-    <div class="footer">
-      &copy;2021, rsj217.
       
-      |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.5.4</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
-      |
-      <a href="../_sources/home/02-rust-ownership-copy-move-clone-borrow.md.txt"
-          rel="nofollow">Page source</a>
-    </div>
-
-    
-
-    
-  </body>
+    </aside>
+  </div>
+</div><script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/scripts/furo.js"></script>
+    <script src="../_static/translations.js"></script>
+    </body>
 </html>

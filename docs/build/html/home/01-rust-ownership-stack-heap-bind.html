@@ -1,39 +1,193 @@
+<!doctype html>
+<html class="no-js" lang="zh_CN">
+  <head><meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <meta name="color-scheme" content="light dark"><link rel="index" title="索引" href="../genindex.html" /><link rel="search" title="搜索" href="../search.html" /><link rel="next" title="Hello World" href="00-hello-world.html" /><link rel="prev" title="浅析Rust所有权Ownership (二) – Copy Move Clone 与 Borrow" href="02-rust-ownership-copy-move-clone-borrow.html" />
 
-<!DOCTYPE html>
+    <meta name="generator" content="sphinx-4.3.1, furo 2021.11.23"/>
+        <title>浅析Rust所有权Ownership (一) – 栈堆与位置绑定 - Blog 0.0.1 文档</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?digest=7f0192ddeb2adecfbaa87ffbcf67d16358b30bc1" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?digest=0af69da206d614734f649b27d4cdc2dd6c31f41d" />
+    
+    
 
-<html lang="zh_CN">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>浅析Rust所有权Ownership (一) – 栈堆与位置绑定 &#8212; Blog 0.0.1 文档</title>
-    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
-    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
-    <script src="../_static/jquery.js"></script>
-    <script src="../_static/underscore.js"></script>
-    <script src="../_static/doctools.js"></script>
-    <script src="../_static/translations.js"></script>
-    <link rel="index" title="索引" href="../genindex.html" />
-    <link rel="search" title="搜索" href="../search.html" />
-    <link rel="next" title="Hello World" href="00-hello-world.html" />
-    <link rel="prev" title="浅析Rust所有权Ownership (二) – Copy Move Clone 与 Borrow" href="02-rust-ownership-copy-move-clone-borrow.html" />
-   
-  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+
+<style>
+  body {
+    --color-code-background: #f8f8f8;
+  --color-code-foreground: black;
+  
+  }
+  body[data-theme="dark"] {
+    --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+  }
+  @media (prefers-color-scheme: dark) {
+    body:not([data-theme="light"]) {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+  }
+</style></head>
+  <body>
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <path stroke="none" d="M0 0h24v24H0z" />
+      <line x1="4" y1="6" x2="20" y2="6" />
+      <line x1="10" y1="12" x2="20" y2="12" />
+      <line x1="6" y1="18" x2="20" y2="18" />
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-half" viewBox="0 0 24 24">
+    <title>Auto light/dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-shadow">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M13 12h5" />
+      <path d="M13 15h4" />
+      <path d="M13 18h1" />
+      <path d="M13 9h4" />
+      <path d="M13 6h1" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc">
+<label class="overlay sidebar-overlay" for="__navigation">
+  <div class="visually-hidden">Hide navigation sidebar</div>
+</label>
+<label class="overlay toc-overlay" for="__toc">
+  <div class="visually-hidden">Hide table of contents sidebar</div>
+</label>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <div class="visually-hidden">Toggle site navigation sidebar</div>
+        <i class="icon"><svg><use href="#svg-menu"></use></svg></i>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../index.html"><div class="brand">Blog 0.0.1 文档</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle">
+          <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+          <svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <div class="visually-hidden">Toggle table of contents sidebar</div>
+        <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../index.html">
   
   
-  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
-
-  </head><body>
+  <span class="sidebar-brand-text">Blog 0.0.1 文档</span>
   
+</a><form class="sidebar-search-container" method="get" action="../search.html" role="search">
+  <input class="sidebar-search" placeholder=搜索 name="q" aria-label="搜索">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current has-children"><a class="reference internal" href="index.html">Home</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="02-rust-ownership-copy-move-clone-borrow.html">浅析Rust所有权Ownership (二) – Copy Move Clone 与 Borrow</a></li>
+<li class="toctree-l2 current current-page"><a class="current reference internal" href="#">浅析Rust所有权Ownership (一) – 栈堆与位置绑定</a></li>
+<li class="toctree-l2"><a class="reference internal" href="00-hello-world.html">Hello World</a></li>
+</ul>
+</li>
+</ul>
 
-    <div class="document">
-      <div class="documentwrapper">
-        <div class="bodywrapper">
-          
-
-          <div class="body" role="main">
-            
-  <div class="tex2jax_ignore mathjax_ignore section" id="rustownership">
+</div>
+</div>
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <div class="content-icon-container">
+          <div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle">
+              <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+              <svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <div class="visually-hidden">Toggle table of contents sidebar</div>
+            <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+          </label>
+        </div>
+        <article role="main">
+          <div class="tex2jax_ignore mathjax_ignore section" id="rustownership">
 <h1>浅析Rust所有权Ownership (一) – 栈堆与位置绑定<a class="headerlink" href="#rustownership" title="永久链接至标题">¶</a></h1>
 <div class="section" id="id1">
 <h2>内存<a class="headerlink" href="#id1" title="永久链接至标题">¶</a></h2>
@@ -57,14 +211,14 @@ Memory，与其他进程没有关系。OS主要通过虚拟内存实现内存管
 </ul>
 <p>这些段也是 OS 抽象分配出来给进程使用。源代码通过编译器处理，以进程方式运行程序的时候，需要合理使用内存段。对于编程开发人员而言，编写代码主要面向的是内存的 Stack 和 Heap 的操作。有的高级语言又帮程序员进行了 Heap
 内存管理。</p>
-<img alt="segment-page" class="align-center" src="../_images/segment-page.png" />
+<img alt="segment-page" class="align-center" src="../_images/segment-page.png"/>
 <p>如上图，进程的视角，内存分为若干段。每个段，实际上被 OS 安插到多个页当中。程序里看见的地址，实际上是 OS 提供的 虚拟地址，而不是内存的物理地址。虚拟地址到物理地址，通过由 MMU 的设备进程转换处理。</p>
 </div>
 <div class="section" id="stack-heap">
 <h3>Stack 与 Heap<a class="headerlink" href="#stack-heap" title="永久链接至标题">¶</a></h3>
 <p>开发者编程主要与 Stack 和 Heap 打交道。Stack 是一段连续的内存，分为多个大小一样的栈单元，也是遵循栈这种数据结构的特点，即先进后出(FILO)。函数调用会创建栈帧(Stack Frame)入栈(push)
 ，栈帧可能包含多个栈单元，每个栈帧又存储了对应函数的局部变量，参数等数据。当然后返回的时候，相应栈帧出栈(pop)。</p>
-<img alt="stack-frame" class="align-center" src="../_images/stack-frame.png" />
+<img alt="stack-frame" class="align-center" src="../_images/stack-frame.png"/>
 <p>上图有两个函数，main 和 foo 函数，先调用 main，创建 main 栈帧，同时 main 函数里的参数，局部变量也相继入栈。然后调用 foo ，再创建 foo 栈帧，foo
 运行结束之后，foo栈帧内的栈单元的元素相继出栈。由此可见，stack 上存储的值，随着入栈出栈相应的创建和释放，这个过程伴随函数调用，几乎是全自动。</p>
 <blockquote>
@@ -79,47 +233,47 @@ Memory，与其他进程没有关系。OS主要通过虚拟内存实现内存管
 <span class="k">fn</span> <span class="nf">main</span><span class="p">(){</span><span class="w"></span>
 <span class="w">    </span><span class="k">unsafe</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
 <span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="n">ptr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">alloc</span><span class="p">(</span><span class="n">Layout</span>::<span class="n">new</span>::<span class="o">&lt;</span><span class="kt">i32</span><span class="o">&gt;</span><span class="p">())</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="o">*</span><span class="k">mut</span><span class="w"> </span><span class="kt">i32</span><span class="p">;</span><span class="w"> </span><span class="c1">// 堆上申请空间，返回指针</span>
-<span class="w">        </span><span class="fm">println!</span><span class="p">(</span><span class="s">&quot;ptr({:p})={:?}&quot;</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">ptr</span><span class="p">,</span><span class="w"> </span><span class="n">ptr</span><span class="p">);</span><span class="w"></span>
+<span class="w">        </span><span class="fm">println!</span><span class="p">(</span><span class="s">"ptr({:p})={:?}"</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">ptr</span><span class="p">,</span><span class="w"> </span><span class="n">ptr</span><span class="p">);</span><span class="w"></span>
 <span class="w">        </span><span class="n">ptr</span><span class="p">.</span><span class="n">write</span><span class="p">(</span><span class="mi">100</span><span class="p">);</span><span class="w">  </span><span class="c1">// 通过指针写入值</span>
 <span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="n">v3</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">Box</span>::<span class="n">from_raw</span><span class="p">(</span><span class="n">ptr</span><span class="p">);</span><span class="w"> </span><span class="c1">// 创建 Box 结构（胖指针）</span>
-<span class="w">        </span><span class="fm">println!</span><span class="p">(</span><span class="s">&quot;v3({:p})={:?}&quot;</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">v3</span><span class="p">,</span><span class="w"> </span><span class="n">v3</span><span class="p">);</span><span class="w"></span>
+<span class="w">        </span><span class="fm">println!</span><span class="p">(</span><span class="s">"v3({:p})={:?}"</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">v3</span><span class="p">,</span><span class="w"> </span><span class="n">v3</span><span class="p">);</span><span class="w"></span>
 <span class="w">    </span><span class="p">}</span><span class="w"></span>
 <span class="p">}</span><span class="w"></span>
 </pre></div>
 </div>
 <p>由此可见。尽管 heap 内存可以自由创建，但是操作的对象都是存储在 stack 上的指针。其他的高级语言也类似，stack 上的变量是一个指针，存储的是 heap 内存地址，也就是通过 stack 来管理 heap。 所以我们更多的关注 stack 上数据是如何变化，且因为 stack 的变化引发的 heap 上关联的内存的变化。</p>
 <p>相比 stack，heap 内存的使用更加灵活自由。自由又意味着需要精确控制。</p>
-<img alt="ref1" class="align-center" src="../_images/ref1.png" />
+<img alt="ref1" class="align-center" src="../_images/ref1.png"/>
 <p>stack 上的指针变量 *a 指向了 heap 内存上的一块数据 A。如果 *a 出栈随即自动销毁，那么需要释放 heap 上的 A。如果不释放，则会造成内存泄漏。一个解决方案就是销毁 *a 的时候，同时释放 A。这种情况很完美。</p>
-<img alt="ref2" class="align-center" src="../_images/ref2.png" />
+<img alt="ref2" class="align-center" src="../_images/ref2.png"/>
 <p>另外一种情况—共享内存。如果又创建了一个指针变量 *aa，它也指向 A 以共享 heap 上的数据。那么如果释放 *a 的时候，释放了 A。那么 *aa 就会指向一个不存在的数据，造成悬垂指针</p>
-<img alt="ref3" class="align-center" src="../_images/ref3.png" />
+<img alt="ref3" class="align-center" src="../_images/ref3.png"/>
 <p>使用 golang 模拟下面的情况：</p>
 <div class="highlight-go notranslate"><div class="highlight"><pre><span></span><span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
 
 	<span class="nx">A</span> <span class="o">:=</span> <span class="p">[]</span><span class="kt">int</span><span class="p">{</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">}</span>  <span class="c1">// 创建一个引用数据</span>
 
-	<span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">&quot;A(%p)=%v\n&quot;</span><span class="p">,</span> <span class="o">&amp;</span><span class="nx">A</span><span class="p">,</span> <span class="nx">A</span><span class="p">)</span>
-	<span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">&quot;A[0](%p)=1\n&quot;</span><span class="p">,</span> <span class="o">&amp;</span><span class="nx">A</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+	<span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">"A(%p)=%v\n"</span><span class="p">,</span> <span class="o">&amp;</span><span class="nx">A</span><span class="p">,</span> <span class="nx">A</span><span class="p">)</span>
+	<span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">"A[0](%p)=1\n"</span><span class="p">,</span> <span class="o">&amp;</span><span class="nx">A</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
 
 
 	<span class="kd">var</span> <span class="nx">a</span> <span class="o">*</span><span class="p">[]</span><span class="kt">int</span>
 
 	<span class="nx">a</span> <span class="p">=</span> <span class="o">&amp;</span><span class="nx">A</span> <span class="c1">// a 指针指向 A</span>
 
-	<span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">&quot;a(%p)=%v\n&quot;</span><span class="p">,</span> <span class="o">&amp;</span><span class="nx">a</span><span class="p">,</span> <span class="nx">a</span><span class="p">)</span>
-	<span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">&quot;a[0](%p)=1\n&quot;</span><span class="p">,</span> <span class="o">&amp;</span><span class="p">(</span><span class="o">*</span><span class="nx">a</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
+	<span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">"a(%p)=%v\n"</span><span class="p">,</span> <span class="o">&amp;</span><span class="nx">a</span><span class="p">,</span> <span class="nx">a</span><span class="p">)</span>
+	<span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">"a[0](%p)=1\n"</span><span class="p">,</span> <span class="o">&amp;</span><span class="p">(</span><span class="o">*</span><span class="nx">a</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
 
 	<span class="kd">var</span> <span class="nx">aa</span> <span class="o">*</span><span class="p">[]</span><span class="kt">int</span>
 
 	<span class="nx">aa</span> <span class="p">=</span> <span class="o">&amp;</span><span class="nx">A</span> <span class="c1">// aa 指针也指向 A a 和 aa 共享 A</span>
 
-	<span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">&quot;aa(%p)=%v\n&quot;</span><span class="p">,</span> <span class="o">&amp;</span><span class="nx">aa</span><span class="p">,</span> <span class="nx">aa</span><span class="p">)</span>
-	<span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">&quot;aa[0](%p)=1\n&quot;</span><span class="p">,</span> <span class="o">&amp;</span><span class="p">(</span><span class="o">*</span><span class="nx">aa</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
+	<span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">"aa(%p)=%v\n"</span><span class="p">,</span> <span class="o">&amp;</span><span class="nx">aa</span><span class="p">,</span> <span class="nx">aa</span><span class="p">)</span>
+	<span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">"aa[0](%p)=1\n"</span><span class="p">,</span> <span class="o">&amp;</span><span class="p">(</span><span class="o">*</span><span class="nx">aa</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
 
 	<span class="o">*</span><span class="nx">aa</span> <span class="p">=</span> <span class="kc">nil</span> <span class="c1">// 释放 A</span>
 
-	<span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">&quot;a(%p)=%v a==nil: %v  aa == nil: %v \n&quot;</span><span class="p">,</span> <span class="o">&amp;</span><span class="nx">a</span><span class="p">,</span> <span class="nx">a</span><span class="p">,</span> <span class="o">*</span><span class="nx">a</span> <span class="o">==</span> <span class="kc">nil</span><span class="p">,</span> <span class="o">*</span><span class="nx">aa</span> <span class="o">==</span> <span class="kc">nil</span><span class="p">)</span> <span class="c1">// *a 变成了悬垂指针</span>
+	<span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">"a(%p)=%v a==nil: %v  aa == nil: %v \n"</span><span class="p">,</span> <span class="o">&amp;</span><span class="nx">a</span><span class="p">,</span> <span class="nx">a</span><span class="p">,</span> <span class="o">*</span><span class="nx">a</span> <span class="o">==</span> <span class="kc">nil</span><span class="p">,</span> <span class="o">*</span><span class="nx">aa</span> <span class="o">==</span> <span class="kc">nil</span><span class="p">)</span> <span class="c1">// *a 变成了悬垂指针</span>
 <span class="p">}</span>
 </pre></div>
 </div>
@@ -164,7 +318,7 @@ Memory，与其他进程没有关系。OS主要通过虚拟内存实现内存管
 <div><p>模式匹配也会创建 位置，其形式和变量赋值类似，为了方便理解，本文的位置和变量表示一个意思。</p>
 </div></blockquote>
 <p>如何理解 rust 的位置和值呢？下面图示是其过程内存布局示意图:</p>
-<img alt="ref3" class="align-center" src="../_images/place-bind.png" />
+<img alt="ref3" class="align-center" src="../_images/place-bind.png"/>
 <ul class="simple">
 <li><p>变量赋值：<code class="docutils literal notranslate"><span class="pre">let</span> <span class="pre">v1</span> <span class="pre">=</span> <span class="pre">100;</span></code>  在 stack 上创建一个位置，命名为 <strong>v1</strong>，存储的值是<strong>100</strong>。这是一个 stack 内存地址。其关系是<strong>值100</strong>和<strong>位置v1</strong>进行绑定。此时值 100 的 ownership 是属于位置 v1。位置和值是一一对应。v1 也就是值 100 的所有者。</p></li>
 <li><p>函数传参：<code class="docutils literal notranslate"><span class="pre">foo(v1);</span></code> 函数调用的时候，stack 会创建一个新的位置 args，并将 v1 的值进行绑定。这里是一个 Copy 语义。稍后会介绍Copy语义，当前只要知道 args 绑定了一个 v1 的值 100。同时 foo 函数执行的时候，其内部也有一个赋值绑定表达式，因此也会出现一个 位置 ans 和 值10 的绑定。</p></li>
@@ -180,7 +334,7 @@ Memory，与其他进程没有关系。OS主要通过虚拟内存实现内存管
 <span class="p">}</span><span class="w"></span>
 </pre></div>
 </div>
-<img alt="ref3" class="align-center" src="../_images/fat-pointer.png" />
+<img alt="ref3" class="align-center" src="../_images/fat-pointer.png"/>
 <p>上述的表达式语句，创建了一个新的位置 v3。v3 位置的是是一个 Box 结构体。同时在 heap 也创建一个位置 v4。v4 的值跟 100 绑定。与 v1 不一样，Box 结构体有一个指针 ptr，其值是位置 v4。这和 Java
 Python等高级语言一样。stack 上的变量是 heap 上的一个地址。</p>
 <div class="highlight-rust notranslate"><div class="highlight"><pre><span></span><span class="kd">let</span><span class="w"> </span><span class="n">v3</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">Box</span><span class="p">;</span><span class="w"></span>
@@ -202,80 +356,86 @@ Python等高级语言一样。stack 上的变量是 heap 上的一个地址。</
 </div>
 </div>
 
-
-          </div>
-          
-        </div>
+        </article>
       </div>
-      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
-        <div class="sphinxsidebarwrapper">
-<h1 class="logo"><a href="../index.html">Blog</a></h1>
+      <footer>
+        
+        <div class="related-pages">
+          <a class="next-page" href="00-hello-world.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title">Hello World</div>
+              </div>
+              <svg><use href="#svg-arrow-right"></use></svg>
+            </a>
+          <a class="prev-page" href="02-rust-ownership-copy-move-clone-borrow.html">
+              <svg><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">浅析Rust所有权Ownership (二) – Copy Move Clone 与 Borrow</div>
+                
+              </div>
+            </a>
+        </div>
 
-
-
-
-
-
-
-
-<h3>导航</h3>
-<p class="caption"><span class="caption-text">Contents:</span></p>
-<ul class="current">
-<li class="toctree-l1 current"><a class="reference internal" href="index.html">Home</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="02-rust-ownership-copy-move-clone-borrow.html">浅析Rust所有权Ownership (二) – Copy Move Clone 与 Borrow</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">浅析Rust所有权Ownership (一) – 栈堆与位置绑定</a></li>
-<li class="toctree-l2"><a class="reference internal" href="00-hello-world.html">Hello World</a></li>
+        <div class="related-information">
+              Copyright &#169; 2021, rsj217 |
+          Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+          <a href="https://github.com/pradyunsg/furo">Furo theme</a>.
+            | <a class="muted-link" href="../_sources/home/01-rust-ownership-stack-heap-bind.md.txt"
+               rel="nofollow">
+              显示源代码
+            </a>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            目录
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">浅析Rust所有权Ownership (一) – 栈堆与位置绑定</a><ul>
+<li><a class="reference internal" href="#id1">内存</a><ul>
+<li><a class="reference internal" href="#id2">分页</a></li>
+<li><a class="reference internal" href="#id3">分段</a></li>
+<li><a class="reference internal" href="#stack-heap">Stack 与 Heap</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#ownership">Ownership</a><ul>
+<li><a class="reference internal" href="#id4">位置与值</a></li>
+<li><a class="reference internal" href="#id5">位置与胖指针</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#id6">总结</a></li>
 </ul>
 </li>
 </ul>
 
-<div class="relations">
-<h3>Related Topics</h3>
-<ul>
-  <li><a href="../index.html">Documentation overview</a><ul>
-  <li><a href="index.html">Home</a><ul>
-      <li>Previous: <a href="02-rust-ownership-copy-move-clone-borrow.html" title="上一章">浅析Rust所有权Ownership (二) – Copy Move Clone 与 Borrow</a></li>
-      <li>Next: <a href="00-hello-world.html" title="下一章">Hello World</a></li>
-  </ul></li>
-  </ul></li>
-</ul>
-</div>
-<div id="searchbox" style="display: none" role="search">
-  <h3 id="searchlabel">快速搜索</h3>
-    <div class="searchformwrapper">
-    <form class="search" action="../search.html" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" />
-      <input type="submit" value="转向" />
-    </form>
-    </div>
-</div>
-<script>$('#searchbox').show(0);</script>
-
-
-
-
-
-
-
-
+          </div>
         </div>
       </div>
-      <div class="clearer"></div>
-    </div>
-    <div class="footer">
-      &copy;2021, rsj217.
       
-      |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.5.4</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
-      |
-      <a href="../_sources/home/01-rust-ownership-stack-heap-bind.md.txt"
-          rel="nofollow">Page source</a>
-    </div>
-
-    
-
-    
-  </body>
+    </aside>
+  </div>
+</div><script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/scripts/furo.js"></script>
+    <script src="../_static/translations.js"></script>
+    </body>
 </html>
