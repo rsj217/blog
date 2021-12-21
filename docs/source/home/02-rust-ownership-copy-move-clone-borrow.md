@@ -76,7 +76,8 @@ fn main() {
 
 `let d2 = d1;` 表达式，也是在 stack 上创建了一个位置 d2(0x7ffee049f278), 其值也是一个 胖指针， 是 `Vec` 胖指针按位复制得到的新的胖指针，姑且称之为 `Vec'`。
 
-那么此时的`Vec'.ptr`(0x7ffeebb182c8) 和 `Vec.ptr`(0x7ffeebb18128)的值一样，都指向了 data(0x7f8a2fc05c20) 这个数据。按照其他语言的做法，data 就有两个指针。而 Rust 在创建 d2 和 `Vec'`之后，之前的 d1 和 `Vec` 将会失效。即 d1 的值移动到了 d2 里。这就是相对于 Copy 的 Move 语义。
+那么此时的`Vec'.ptr`(0x7ffeebb182c8) 和 `Vec.ptr`(0x7ffeebb18128)的值一样，都指向了 data(0x7f8a2fc05c20) 这个数据。按照其他语言的做法，data 就有两个指针。而 Rust 在创建 d2 和 `Vec'`之后，之前的 d1 和 `Vec` 将会失效，所谓失效，就是位置值未定义(uninitialized)，未定义值的位置是不能访问或使用的。
+即 d1 的值移动到了 d2 里，d1 变成了未定义。这就是相对于 Copy 的 Move 语义。
 
 顾名思义，Copy 是拷贝，原值和新值都存在，Move 是移动，原值被移动到新值的地方。
 
