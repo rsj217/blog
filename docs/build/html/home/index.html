@@ -2,7 +2,7 @@
 <html class="no-js" lang="zh_CN">
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
-    <meta name="color-scheme" content="light dark"><link rel="index" title="索引" href="../genindex.html" /><link rel="search" title="搜索" href="../search.html" /><link rel="next" title="浅析Rust所有权Ownership (二) – Copy Move Clone 与 Borrow" href="02-rust-ownership-copy-move-clone-borrow.html" /><link rel="prev" title="Rsj217’s Blog" href="../index.html" />
+    <meta name="color-scheme" content="light dark"><link rel="index" title="索引" href="../genindex.html" /><link rel="search" title="搜索" href="../search.html" /><link rel="next" title="浅析 Rust 生存期 Lifetime – 借用 borrow" href="03-rust-lifetime-borrow.html" /><link rel="prev" title="Rsj217’s Blog" href="../index.html" />
 
     <meta name="generator" content="sphinx-4.3.1, furo 2021.11.23"/>
         <title>Home - Blog 0.0.1 文档</title>
@@ -156,6 +156,7 @@
   <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
 <li class="toctree-l1 current has-children current-page"><a class="current reference internal" href="#">Home</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="03-rust-lifetime-borrow.html">浅析 Rust 生存期 Lifetime – 借用 borrow</a></li>
 <li class="toctree-l2"><a class="reference internal" href="02-rust-ownership-copy-move-clone-borrow.html">浅析Rust所有权Ownership (二) – Copy Move Clone 与 Borrow</a></li>
 <li class="toctree-l2"><a class="reference internal" href="01-rust-ownership-stack-heap-bind.html">浅析Rust所有权Ownership (一) – 栈堆与位置绑定</a></li>
 <li class="toctree-l2"><a class="reference internal" href="00-hello-world.html">Hello World</a></li>
@@ -191,6 +192,18 @@
 <h1>Home<a class="headerlink" href="#home" title="永久链接至标题">¶</a></h1>
 <div class="toctree-wrapper compound">
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="03-rust-lifetime-borrow.html">浅析 Rust 生存期 Lifetime – 借用 borrow</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="03-rust-lifetime-borrow.html#id1">原始者与借用者</a></li>
+<li class="toctree-l2"><a class="reference internal" href="03-rust-lifetime-borrow.html#id2">值存活期和生存期</a></li>
+<li class="toctree-l2"><a class="reference internal" href="03-rust-lifetime-borrow.html#id3">借用规则</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="03-rust-lifetime-borrow.html#lifetime">借用的lifetime，不可超出其所有者的作用域</a></li>
+<li class="toctree-l3"><a class="reference internal" href="03-rust-lifetime-borrow.html#id4">共享借用的lifetime内，所有者暂时不可变</a></li>
+<li class="toctree-l3"><a class="reference internal" href="03-rust-lifetime-borrow.html#id5">独占引用的原始值，必须是可变的</a></li>
+<li class="toctree-l3"><a class="reference internal" href="03-rust-lifetime-borrow.html#id6">独占借用的lifetime内，所有者被冻结，不能读也不能写</a></li>
+</ul>
+</li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="02-rust-ownership-copy-move-clone-borrow.html">浅析Rust所有权Ownership (二) – Copy Move Clone 与 Borrow</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="02-rust-ownership-copy-move-clone-borrow.html#copy">Copy 语义</a></li>
 <li class="toctree-l2"><a class="reference internal" href="02-rust-ownership-copy-move-clone-borrow.html#move">Move 语义</a></li>
@@ -213,11 +226,11 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="01-rust-ownership-stack-heap-bind.html#ownership">Ownership</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="01-rust-ownership-stack-heap-bind.html#id4">位置与值</a></li>
-<li class="toctree-l3"><a class="reference internal" href="01-rust-ownership-stack-heap-bind.html#id5">位置与胖指针</a></li>
+<li class="toctree-l3"><a class="reference internal" href="01-rust-ownership-stack-heap-bind.html#id6">位置与值</a></li>
+<li class="toctree-l3"><a class="reference internal" href="01-rust-ownership-stack-heap-bind.html#id8">位置变量与胖指针</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="01-rust-ownership-stack-heap-bind.html#id6">总结</a></li>
+<li class="toctree-l2"><a class="reference internal" href="01-rust-ownership-stack-heap-bind.html#id10">总结</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="00-hello-world.html">Hello World</a><ul>
@@ -233,12 +246,12 @@
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="02-rust-ownership-copy-move-clone-borrow.html">
+          <a class="next-page" href="03-rust-lifetime-borrow.html">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">浅析Rust所有权Ownership (二) – Copy Move Clone 与 Borrow</div>
+                <div class="title">浅析 Rust 生存期 Lifetime – 借用 borrow</div>
               </div>
               <svg><use href="#svg-arrow-right"></use></svg>
             </a>
