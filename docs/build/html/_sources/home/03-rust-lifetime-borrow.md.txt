@@ -98,9 +98,9 @@ fn main() {
     {                        //              |
         let x = 10;          //  -----+ x    |
         r = &x;              //       |      |
-            ^^ borrowed value does not live long enough
+ //           ^^ borrowed value does not live long enough
     }                        //  -----+      |
-     - `x` dropped here while still borrowed
+ //  - `x` dropped here while still borrowed
                              //              |
     println!("{}", r);       //  ------------+
                    - borrow later used here
@@ -137,13 +137,13 @@ fn main() {
     println!("{}", x);               //                           |
                                      //                           |
     let r1 = &x;                     //  ------------+ r1         |
-             -- borrow of `x` occurs here            |            |
+ //          -- borrow of `x` occurs here            |            |
     x = 100;                         //              |            |
-    ^^^^^^^ assignment to borrowed `x` occurs here   |            |
+ // ^^^^^^^ assignment to borrowed `x` occurs here   |            |
     println!("{}", r1);              //  ------------+            |
                                      //                           |
-    println!("{}", x);               //  -------------------------+
-                   -- borrow later used here
+    println!("{}", x);               //  -------------------------+ 
+ //               -- borrow later used here
 }
 ```
 
@@ -318,15 +318,15 @@ fn main() {
                                      //                            |
                                      //                            |
     let r1 = &mut x;                 //  -------------+ r1         |
-             --- borrow of `*r1` occurs here          |            |
+//           --- borrow of `*r1` occurs here          |            |
     let r2 = &r1;                    //  -------+ r2  |            |
                                      //         |     |            |
     *r1 = 10;                        //         |     |            |
-     ^^^^^^^^ assignment to borrowed `*r1` occurs here|            |
+//  ^^^^^^^^ assignment to borrowed `*r1` occurs here|            |
     println!("{}", r1);              //  -------+-----+            |
                                      //         |                  |
     println!("{}", r2);              //  -------+                  |
-}                  -- borrow later used here ----------------------+
+} //               -- borrow later used here ----------------------+
 
 ```
 上面这种情况，可以看出是 在 r2 的lifetime内，其原始值 r1 不能变。与第一种case类似。移除最后一行对 r2 的访问，就能编译通过。
