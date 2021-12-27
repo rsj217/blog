@@ -1,0 +1,557 @@
+<!doctype html>
+<html class="no-js" lang="zh_CN">
+  <head><meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <meta name="color-scheme" content="light dark"><link rel="index" title="索引" href="../genindex.html" /><link rel="search" title="搜索" href="../search.html" /><link rel="next" title="浅析Rust所有权Ownership (二) – Copy Move Clone 与 Borrow" href="02-rust-ownership-copy-move-clone-borrow.html" /><link rel="prev" title="Home" href="index.html" />
+
+    <meta name="generator" content="sphinx-4.3.1, furo 2021.11.23"/>
+        <title>浅析 Rust 生存期 Lifetime – 借用 borrow - Blog 0.0.1 文档</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?digest=7f0192ddeb2adecfbaa87ffbcf67d16358b30bc1" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?digest=0af69da206d614734f649b27d4cdc2dd6c31f41d" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f8f8f8;
+  --color-code-foreground: black;
+  
+  }
+  body[data-theme="dark"] {
+    --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+  }
+  @media (prefers-color-scheme: dark) {
+    body:not([data-theme="light"]) {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+  }
+</style></head>
+  <body>
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <path stroke="none" d="M0 0h24v24H0z" />
+      <line x1="4" y1="6" x2="20" y2="6" />
+      <line x1="10" y1="12" x2="20" y2="12" />
+      <line x1="6" y1="18" x2="20" y2="18" />
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-half" viewBox="0 0 24 24">
+    <title>Auto light/dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-shadow">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M13 12h5" />
+      <path d="M13 15h4" />
+      <path d="M13 18h1" />
+      <path d="M13 9h4" />
+      <path d="M13 6h1" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc">
+<label class="overlay sidebar-overlay" for="__navigation">
+  <div class="visually-hidden">Hide navigation sidebar</div>
+</label>
+<label class="overlay toc-overlay" for="__toc">
+  <div class="visually-hidden">Hide table of contents sidebar</div>
+</label>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <div class="visually-hidden">Toggle site navigation sidebar</div>
+        <i class="icon"><svg><use href="#svg-menu"></use></svg></i>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../index.html"><div class="brand">Blog 0.0.1 文档</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle">
+          <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+          <svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <div class="visually-hidden">Toggle table of contents sidebar</div>
+        <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../index.html">
+  
+  
+  <span class="sidebar-brand-text">Blog 0.0.1 文档</span>
+  
+</a><form class="sidebar-search-container" method="get" action="../search.html" role="search">
+  <input class="sidebar-search" placeholder=搜索 name="q" aria-label="搜索">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current has-children"><a class="reference internal" href="index.html">Home</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
+<li class="toctree-l2 current current-page"><a class="current reference internal" href="#">浅析 Rust 生存期 Lifetime – 借用 borrow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="02-rust-ownership-copy-move-clone-borrow.html">浅析Rust所有权Ownership (二) – Copy Move Clone 与 Borrow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="01-rust-ownership-stack-heap-bind.html">浅析Rust所有权Ownership (一) – 栈堆与位置绑定</a></li>
+<li class="toctree-l2"><a class="reference internal" href="00-hello-world.html">Hello World</a></li>
+</ul>
+</li>
+</ul>
+
+</div>
+</div>
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <div class="content-icon-container">
+          <div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle">
+              <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+              <svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <div class="visually-hidden">Toggle table of contents sidebar</div>
+            <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+          </label>
+        </div>
+        <article role="main">
+          <div class="tex2jax_ignore mathjax_ignore section" id="rust-lifetime-borrow">
+<h1>浅析 Rust 生存期 Lifetime – 借用 borrow<a class="headerlink" href="#rust-lifetime-borrow" title="永久链接至标题">¶</a></h1>
+<p>Rust 是内存安全的语言，通过值的单一ownership机制，位置变量离开作用域的时候，可以自动析构其关联的值。不仅实现了自动化管理内存，还避免了悬垂引用和重复释放。Rust的Copy，Move语义提供了值的ownership操作相关的语义。</p>
+<blockquote>
+<div><p>本文的约定，其他语言的 变量 ，在本文中使用 位置 这个名词。</p>
+</div></blockquote>
+<p>Rust中不能在编译时确定大小的类型，需要存储在heap上。通过stack上的胖指针使用heap内存。函数调用的时候，每次都使用 move 语义，那么就需要返回的时候回收所有权。</p>
+<div class="highlight-rust notranslate"><div class="highlight"><pre><span></span><span class="k">fn</span> <span class="nf">main</span><span class="p">(){</span><span class="w"></span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">s</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">"hello"</span><span class="p">.</span><span class="n">to_string</span><span class="p">();</span><span class="w"></span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">s</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">foo</span><span class="p">(</span><span class="n">s</span><span class="p">);</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+
+<span class="k">fn</span> <span class="nf">foo</span><span class="p">(</span><span class="n">s</span>: <span class="nb">String</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="nb">String</span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="n">s</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+<p>如果使用 Clone 语义，虽然可以解决问题，但是会造成 heap 内存的复制。当 heap 上的数据很大的时候，会造成性能问题。一种常用的解决方法就是传引用。可以通过借用Borrow实现共享内存。即借用位置的值而不是转移所有权。</p>
+<div class="section" id="id1">
+<h2>原始者与借用者<a class="headerlink" href="#id1" title="永久链接至标题">¶</a></h2>
+<p>下面的代码中</p>
+<div class="highlight-rust notranslate"><div class="highlight"><pre><span></span><span class="k">fn</span> <span class="nf">main</span><span class="p">(){</span><span class="w"></span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">v</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">"hello"</span><span class="p">.</span><span class="n">to_string</span><span class="p">();</span><span class="w"></span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">r1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">&amp;</span><span class="n">v</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">r2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">&amp;</span><span class="n">v</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">r3</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">r1</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">r4</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">&amp;</span><span class="n">r1</span><span class="p">;</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+<p>v 是一个位置(变量)，它的值是一个指向heap的胖指针，heap上是指向静态区的”hello”字串。r1，r2 都是 v 的借用，r3 也是 r1 的胖指针copy，r4 是 r1 的借用。</p>
+<p>为了描述方便，<code class="docutils literal notranslate"><span class="pre">let</span> <span class="pre">r4</span> <span class="pre">=</span> <span class="pre">&amp;r1;</span></code> 我们定义 r1 为原始者(source)，r4 为借用者(target)。</p>
+</div>
+<div class="section" id="id2">
+<h2>值存活期和生存期<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h2>
+<p>位置是对值的绑定，每一个位置和其值都有其存活期。当位置离开其作用域，那么值和位置都会被释放。当值执行move语义之后，原始的值变成了 uninitialized，可以认为这个 位置 也就失效了，不能读也不能写。</p>
+<p>rust 中的每一个借用类型，它们也和普通值一样有一个位置绑定，位置的存活期也是其作用域范围。但是每个借用除了存活期，还有生存期(Lifetime)。借用的lifetime指其声明绑定，到访问它的区间。</p>
+<div class="highlight-rust notranslate"><div class="highlight"><pre><span></span><span class="k">fn</span> <span class="nf">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">v</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">"hello"</span><span class="p">.</span><span class="n">to_string</span><span class="p">();</span><span class="w">    </span><span class="c1">//  ----------------+  v</span>
+<span class="w">                                    </span><span class="c1">//                  |</span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">r1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">&amp;</span><span class="n">v</span><span class="p">;</span><span class="w">                    </span><span class="c1">//  --------+ r1    |</span>
+<span class="w">                                    </span><span class="c1">//          |       |</span>
+<span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">"{}"</span><span class="p">,</span><span class="w"> </span><span class="n">r1</span><span class="p">);</span><span class="w">             </span><span class="c1">//  --------+       |</span>
+<span class="w">                                    </span><span class="c1">//  ----------------+</span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+<p>v 的存活期是其作用域，从 v 的定义到 main 函数花括号结束，r1的 lifetime 是其从其定义<code class="docutils literal notranslate"><span class="pre">let</span></code>语句到访问它的<code class="docutils literal notranslate"><span class="pre">println!</span></code>宏调用。多个借用之间，借用与原值之间的区间关系有两种，上述 v 的存活期完全覆盖 r1 的lifetime。下面的关系则是，两个借用 r1 和 r2 有交叉重叠。</p>
+<div class="highlight-rust notranslate"><div class="highlight"><pre><span></span><span class="k">fn</span> <span class="nf">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">v</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">"hello"</span><span class="p">.</span><span class="n">to_string</span><span class="p">();</span><span class="w">    </span><span class="c1">//  ----------------+  v</span>
+<span class="w">                                    </span><span class="c1">//                  |</span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">r1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">&amp;</span><span class="n">v</span><span class="p">;</span><span class="w">                    </span><span class="c1">//  --------+ r1    |</span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">r2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">&amp;</span><span class="n">v</span><span class="p">;</span><span class="w">                    </span><span class="c1">//  ---+ r2    |    |</span>
+<span class="w">                                    </span><span class="c1">//     |       |    |</span>
+<span class="w">                                    </span><span class="c1">//     |       |    |</span>
+<span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">"{}"</span><span class="p">,</span><span class="w"> </span><span class="n">r1</span><span class="p">);</span><span class="w">             </span><span class="c1">//  ---+-------+    |</span>
+<span class="w">                                           </span><span class="o">|</span><span class="w">            </span><span class="o">|</span><span class="w"></span>
+<span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">"{}"</span><span class="p">,</span><span class="w"> </span><span class="n">r2</span><span class="p">);</span><span class="w">             </span><span class="c1">//  ---+            |</span>
+<span class="w">                                    </span><span class="c1">//  ----------------+</span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+<p>交叉重叠的情况下，共享和独占的属性不一样，其结果页不一样。主要的原则大致是，可以有多个共享借用，但只能有一个独占借用，其目的就是独占借用可以修改原值，不符合预期的修改，会导致共享借用使用到非预期的值。当前的描述略抽象，下面针对rust借用中五个常见的case进行介绍。</p>
+</div>
+<div class="section" id="id3">
+<h2>借用规则<a class="headerlink" href="#id3" title="永久链接至标题">¶</a></h2>
+<p>介绍了上面的约定之后，下面再来看 Rust 的借用规则。大致有 5 条规则。</p>
+<div class="section" id="lifetime">
+<h3>借用的lifetime，不可超出其所有者的作用域<a class="headerlink" href="#lifetime" title="永久链接至标题">¶</a></h3>
+<p>一个借用，其值是一个地址，这个地址要么是上一个借用的地址，要么就是原始值的地址。当前的借用的lifetime，不能超过它所依赖的变量的作用域。</p>
+<div class="highlight-rust notranslate"><div class="highlight"><pre><span></span>fn main() {
+
+    let r: &amp;i32;             //  ------------+ r
+    {                        //              |
+        let x = 10;          //  -----+ x    |
+        r = &amp;x;              //       |      |
+            ^^ borrowed value does not live long enough
+    }                        //  -----+      |
+     - `x` dropped here while still borrowed
+                             //              |
+    println!("{}", r);       //  ------------+
+                   - borrow later used here
+}
+
+</pre></div>
+</div>
+<p>上面的例子中，r的lifetime 覆盖了 x 的存活期，与第一条规则相悖。这是典型的悬垂引用，引用还存在，但是它所指向的值已被释放。</p>
+</div>
+<div class="section" id="id4">
+<h3>共享借用的lifetime内，所有者暂时不可变<a class="headerlink" href="#id4" title="永久链接至标题">¶</a></h3>
+<p>共享借用的时候，所有者不能修改。这很好理解，引用使用了某个值，正要使用这个引用的时候，如果值变了，就会有意想不到的事情。</p>
+<div class="highlight-rust notranslate"><div class="highlight"><pre><span></span><span class="k">fn</span> <span class="nf">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="k">mut</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">100</span><span class="p">;</span><span class="w">                 </span><span class="c1">//  -------------------------+ x</span>
+<span class="w">                                     </span><span class="c1">//                           |</span>
+<span class="w">    </span><span class="n">x</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">10</span><span class="p">;</span><span class="w">                          </span><span class="c1">//                           |</span>
+<span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">"{}"</span><span class="p">,</span><span class="w"> </span><span class="n">x</span><span class="p">);</span><span class="w">               </span><span class="c1">//                           |</span>
+<span class="w">                                     </span><span class="c1">//                           |</span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">r1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">&amp;</span><span class="n">x</span><span class="p">;</span><span class="w">        			 </span><span class="c1">//  ------------+ r1         |</span>
+<span class="w">                                     </span><span class="c1">//                           |</span>
+<span class="w">    </span><span class="n">x</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">100</span><span class="p">;</span><span class="w">						 </span><span class="c1">//                           |</span>
+<span class="w">                                     </span><span class="c1">//                           |</span>
+<span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">"{}"</span><span class="p">,</span><span class="w"> </span><span class="n">x</span><span class="p">);</span><span class="w">               </span><span class="c1">//  -------------------------+</span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+<p>上述代码中，r1 并没有使用，其lifetime并不活跃。在其 r1 的 lifetime 内，x 并没有改变。因此是合法的，如果稍后访问一下 r1，是其lifetime撑开。则会变成非法：</p>
+<div class="highlight-rust notranslate"><div class="highlight"><pre><span></span>fn main() {
+    let mut x = 100;                 //  -------------------------+ x
+                                     //                           |
+    x = 10;                          //                           |
+    println!("{}", x);               //                           |
+                                     //                           |
+    let r1 = &amp;x;                     //  ------------+ r1         |
+             -- borrow of `x` occurs here            |            |
+    x = 100;                         //              |            |
+    ^^^^^^^ assignment to borrowed `x` occurs here   |            |
+    println!("{}", r1);              //  ------------+            |
+                                     //                           |
+    println!("{}", x);               //  -------------------------+
+                   -- borrow later used here
+}
+</pre></div>
+</div>
+<div class="highlight-rust notranslate"><div class="highlight"><pre><span></span><span class="k">fn</span> <span class="nf">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="k">mut</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">100</span><span class="p">;</span><span class="w">                 </span><span class="c1">//  -------------------------+ x</span>
+<span class="w">                                     </span><span class="c1">//                           |</span>
+<span class="w">    </span><span class="n">x</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">10</span><span class="p">;</span><span class="w">                          </span><span class="c1">//                           |</span>
+<span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">"{}"</span><span class="p">,</span><span class="w"> </span><span class="n">x</span><span class="p">);</span><span class="w">               </span><span class="c1">//                           |</span>
+<span class="w">                                     </span><span class="c1">//                           |</span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">r1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">&amp;</span><span class="n">x</span><span class="p">;</span><span class="w">                     </span><span class="c1">//  ------------+ r1         |</span>
+<span class="w">             </span><span class="o">--</span><span class="w"> </span><span class="n">immutable</span><span class="w"> </span><span class="n">borrow</span><span class="w"> </span><span class="n">occurs</span><span class="w"> </span><span class="n">here</span><span class="w">         </span><span class="o">|</span><span class="w">            </span><span class="o">|</span><span class="w"></span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">r2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="n">x</span><span class="p">;</span><span class="w">                 </span><span class="c1">//              |            |</span>
+<span class="w">             </span><span class="o">^^^^^^</span><span class="w"> </span><span class="n">mutable</span><span class="w"> </span><span class="n">borrow</span><span class="w"> </span><span class="n">occurs</span><span class="w"> </span><span class="n">here</span><span class="w">       </span><span class="o">|</span><span class="w">            </span><span class="o">|</span><span class="w"></span>
+<span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">"{}"</span><span class="p">,</span><span class="w"> </span><span class="n">r1</span><span class="p">);</span><span class="w">              </span><span class="c1">//  ------------+            |</span>
+<span class="w">                   </span><span class="o">--</span><span class="w"> </span><span class="n">immutable</span><span class="w"> </span><span class="n">borrow</span><span class="w"> </span><span class="n">later</span><span class="w"> </span><span class="n">used</span><span class="w"> </span><span class="n">here</span><span class="w">            </span><span class="o">|</span><span class="w"></span>
+<span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">"{}"</span><span class="p">,</span><span class="w"> </span><span class="n">x</span><span class="p">);</span><span class="w">               </span><span class="c1">//  -------------------------+</span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="id5">
+<h3>独占引用的原始值，必须是可变的<a class="headerlink" href="#id5" title="永久链接至标题">¶</a></h3>
+<p>独占引用可以修改原始值，那么其借用的原始值必须声明为可变的。</p>
+<div class="highlight-rust notranslate"><div class="highlight"><pre><span></span><span class="k">fn</span> <span class="nf">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">100</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">r1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="n">x</span><span class="p">;</span><span class="w"></span>
+<span class="w">             </span><span class="o">^^^^^^</span><span class="w"> </span><span class="n">cannot</span><span class="w"> </span><span class="n">borrow</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">mutable</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+<p>将 x 声明为 可变的</p>
+<div class="highlight-rust notranslate"><div class="highlight"><pre><span></span><span class="k">fn</span> <span class="nf">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="k">mut</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">100</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">r1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="n">x</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="o">*</span><span class="n">r1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">10</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">"{}"</span><span class="p">,</span><span class="w"> </span><span class="n">x</span><span class="p">);</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+<p>通过 *r1 的取值修改，最终 x 的值被修改为 10。如果 x 没有 mut 修饰，那么使用 <code class="docutils literal notranslate"><span class="pre">*r1=10</span></code> 的时候就会逻辑不自恰，修改了一个不能修改的变量。</p>
+</div>
+<div class="section" id="id6">
+<h3>独占借用的lifetime内，所有者被冻结，不能读也不能写<a class="headerlink" href="#id6" title="永久链接至标题">¶</a></h3>
+<p>与共享引用类似，在引用的lifetime内，原始值所有者也会有限制。其中对于独占引用，原始值所有者等价于被冻结。不能读写。</p>
+<div class="highlight-rust notranslate"><div class="highlight"><pre><span></span><span class="k">fn</span> <span class="nf">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="k">mut</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">100</span><span class="p">;</span><span class="w">                 </span><span class="c1">//  -------------------------+ x</span>
+<span class="w">                                     </span><span class="c1">//                           |</span>
+<span class="w">    </span><span class="n">x</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">10</span><span class="p">;</span><span class="w">                          </span><span class="c1">//                           |</span>
+<span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">"{}"</span><span class="p">,</span><span class="w"> </span><span class="n">x</span><span class="p">);</span><span class="w">               </span><span class="c1">//                           |</span>
+<span class="w">                                     </span><span class="c1">//                           |</span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">r1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="n">x</span><span class="p">;</span><span class="w">                 </span><span class="c1">//  ------------+ r1         |</span>
+<span class="w">                                     </span><span class="c1">//                           |</span>
+<span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">"{}"</span><span class="p">,</span><span class="w"> </span><span class="n">x</span><span class="p">);</span><span class="w">               </span><span class="c1">//                           |</span>
+<span class="w">    </span><span class="n">x</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">10</span><span class="p">;</span><span class="w">						     </span><span class="c1">//                           |</span>
+<span class="w">                                     </span><span class="c1">//                           |</span>
+<span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">"{}"</span><span class="p">,</span><span class="w"> </span><span class="n">x</span><span class="p">);</span><span class="w">               </span><span class="c1">//                           |</span>
+<span class="p">}</span><span class="w">                                    </span><span class="c1">//  -------------------------+</span>
+</pre></div>
+</div>
+<p>r1 是独占引用，但是没有访问它，可以编译通过。</p>
+<div class="highlight-rust notranslate"><div class="highlight"><pre><span></span><span class="k">fn</span> <span class="nf">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="k">mut</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">100</span><span class="p">;</span><span class="w">                 </span><span class="c1">//  -------------------------+ x</span>
+<span class="w">                                     </span><span class="c1">//                           |</span>
+<span class="w">    </span><span class="n">x</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">10</span><span class="p">;</span><span class="w">                          </span><span class="c1">//                           |</span>
+<span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">"{}"</span><span class="p">,</span><span class="w"> </span><span class="n">x</span><span class="p">);</span><span class="w">               </span><span class="c1">//                           |</span>
+<span class="w">                                     </span><span class="c1">//                           |</span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">r1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="n">x</span><span class="p">;</span><span class="w">                 </span><span class="c1">//  -------------+ r1        |</span>
+<span class="w">             </span><span class="o">------</span><span class="w"> </span><span class="n">mutable</span><span class="w"> </span><span class="n">borrow</span><span class="w"> </span><span class="n">occurs</span><span class="w"> </span><span class="n">here</span><span class="w">        </span><span class="o">|</span><span class="w">           </span><span class="o">|</span><span class="w"></span>
+<span class="w">                                     </span><span class="c1">//               |           |</span>
+<span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">"{}"</span><span class="p">,</span><span class="w"> </span><span class="n">x</span><span class="p">);</span><span class="w">               </span><span class="c1">//               |           |</span>
+<span class="w">                   </span><span class="o">^</span><span class="w"> </span><span class="n">immutable</span><span class="w"> </span><span class="n">borrow</span><span class="w"> </span><span class="n">occurs</span><span class="w"> </span><span class="n">here</span><span class="w">     </span><span class="o">|</span><span class="w">           </span><span class="o">|</span><span class="w"></span>
+<span class="w">                                     </span><span class="c1">//               |           |</span>
+<span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">"{}"</span><span class="p">,</span><span class="w"> </span><span class="n">r1</span><span class="p">);</span><span class="w">              </span><span class="c1">//  -------------+           |</span>
+<span class="w">                   </span><span class="o">--</span><span class="w"> </span><span class="n">mutable</span><span class="w"> </span><span class="n">borrow</span><span class="w"> </span><span class="n">later</span><span class="w"> </span><span class="n">used</span><span class="w"> </span><span class="n">here</span><span class="w">              </span><span class="o">|</span><span class="w"></span>
+<span class="p">}</span><span class="w">                                    </span><span class="c1">//  -------------------------+</span>
+</pre></div>
+</div>
+<p>当最后一行访问了 r1 ，r1的lifetime被撑开了，r1的lifetime内访问了 x，此时报错，x 被冻结，不能读写</p>
+<div class="highlight-rust notranslate"><div class="highlight"><pre><span></span><span class="k">fn</span> <span class="nf">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="k">mut</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">100</span><span class="p">;</span><span class="w">                 </span><span class="c1">//  --------------------------+ x</span>
+<span class="w">                                     </span><span class="c1">//                            |</span>
+<span class="w">    </span><span class="n">x</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">10</span><span class="p">;</span><span class="w">                          </span><span class="c1">//                            |</span>
+<span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">"{}"</span><span class="p">,</span><span class="w"> </span><span class="n">x</span><span class="p">);</span><span class="w">               </span><span class="c1">//                            |</span>
+<span class="w">                                     </span><span class="c1">//                            |</span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">r1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="n">x</span><span class="p">;</span><span class="w">                 </span><span class="c1">//  -------------+ r1 = 'a    |</span>
+<span class="w">                                     </span><span class="c1">//               |            |</span>
+<span class="w">                                     </span><span class="c1">//               |            |</span>
+<span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">"{}"</span><span class="p">,</span><span class="w"> </span><span class="n">r1</span><span class="p">);</span><span class="w">              </span><span class="c1">//  -------------+            |</span>
+<span class="w">                                     </span><span class="c1">//                            |</span>
+<span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">"{}"</span><span class="p">,</span><span class="w"> </span><span class="n">x</span><span class="p">);</span><span class="w">               </span><span class="c1">//                            |</span>
+<span class="p">}</span><span class="w">                                    </span><span class="c1">//  --------------------------+</span>
+</pre></div>
+</div>
+<p>上述的例子中，r1 的lifetime之后，x 恢复原样的属性，既可读也可写。</p>
+<p>最后一种情况是引用与引用的关系，也是最复杂的一种。遇到类似的情况，只需要画出各引用的lifetime区间，再加以分析，就能拨云见雾，柳暗花明。</p>
+<div class="highlight-rust notranslate"><div class="highlight"><pre><span></span><span class="k">fn</span> <span class="nf">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="k">mut</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">100</span><span class="p">;</span><span class="w">                 </span><span class="c1">//  --------------------------+ x</span>
+<span class="w">                                     </span><span class="c1">//                            |</span>
+<span class="w">                                     </span><span class="c1">//                            |</span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">r1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="n">x</span><span class="p">;</span><span class="w">                 </span><span class="c1">//  -------------+ r1         |</span>
+<span class="w">             </span><span class="o">------</span><span class="w"> </span><span class="n">mutable</span><span class="w"> </span><span class="n">borrow</span><span class="w"> </span><span class="n">occurs</span><span class="w"> </span><span class="n">here</span><span class="w">        </span><span class="o">|</span><span class="w">            </span><span class="o">|</span><span class="w"></span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">r2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">&amp;</span><span class="n">x</span><span class="p">;</span><span class="w">                     </span><span class="c1">//               |            |</span>
+<span class="w">             </span><span class="o">^^</span><span class="w"> </span><span class="n">immutable</span><span class="w"> </span><span class="n">borrow</span><span class="w"> </span><span class="n">occurs</span><span class="w"> </span><span class="n">here</span><span class="w">          </span><span class="o">|</span><span class="w">            </span><span class="o">|</span><span class="w"></span>
+<span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">"{}"</span><span class="p">,</span><span class="w"> </span><span class="n">r1</span><span class="p">);</span><span class="w">              </span><span class="c1">//  -------------+            |</span>
+<span class="w">                   </span><span class="o">--</span><span class="w"> </span><span class="n">mutable</span><span class="w"> </span><span class="n">borrow</span><span class="w"> </span><span class="n">later</span><span class="w"> </span><span class="n">used</span><span class="w"> </span><span class="n">here</span><span class="w">               </span><span class="o">|</span><span class="w"></span>
+<span class="p">}</span><span class="w">                                    </span><span class="c1">//  --------------------------+</span>
+</pre></div>
+</div>
+<p>独占引用 r1 的lifetime 中，出现了 共享引用 r2，所有报错。</p>
+<div class="highlight-rust notranslate"><div class="highlight"><pre><span></span><span class="k">fn</span> <span class="nf">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="k">mut</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">100</span><span class="p">;</span><span class="w">                 </span><span class="c1">//  --------------------------+ x</span>
+<span class="w">                                     </span><span class="c1">//                            |</span>
+<span class="w">                                     </span><span class="c1">//                            |</span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">r1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="n">x</span><span class="p">;</span><span class="w">                 </span><span class="c1">//  -------------+ r1         |</span>
+<span class="w">                                     </span><span class="c1">//               |            |</span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">r2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">&amp;</span><span class="n">r1</span><span class="p">;</span><span class="w">                    </span><span class="c1">//  -------+ r2  |            |</span>
+<span class="w">                                     </span><span class="c1">//         |     |            |</span>
+<span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">"{}"</span><span class="p">,</span><span class="w"> </span><span class="n">r2</span><span class="p">);</span><span class="w">              </span><span class="c1">//  -------+     |            |</span>
+<span class="w">                                     </span><span class="c1">//               |            |</span>
+<span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">"{}"</span><span class="p">,</span><span class="w"> </span><span class="n">r1</span><span class="p">);</span><span class="w">              </span><span class="c1">//  -------------+            |</span>
+<span class="w">                                     </span><span class="c1">//                            |</span>
+<span class="p">}</span><span class="w">                                    </span><span class="c1">//  --------------------------+</span>
+</pre></div>
+</div>
+<p>尽管上面的 r1 的lifetime 覆盖了 r2，但是 r2 来源于 r1，这里的其他引用是指其他引用了 r1 所有者 x 的引用，这种覆盖是合法的。就类似所有者借出所有权之后，借出的变量使用完毕归还。同样的，下面尽管 r1 和 r2 lifetime 重叠，但是r1不是和其他引用的重叠</p>
+<div class="highlight-rust notranslate"><div class="highlight"><pre><span></span><span class="k">fn</span> <span class="nf">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="k">mut</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">100</span><span class="p">;</span><span class="w">                 </span><span class="c1">//  --------------------------+ x</span>
+<span class="w">                                     </span><span class="c1">//                            |</span>
+<span class="w">                                     </span><span class="c1">//                            |</span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">r1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="n">x</span><span class="p">;</span><span class="w">                 </span><span class="c1">//  -------------+ r1         |</span>
+<span class="w">                                     </span><span class="c1">//               |            |</span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">r2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">&amp;</span><span class="n">r1</span><span class="p">;</span><span class="w">                    </span><span class="c1">//  -------+ r2  |            |</span>
+<span class="w">                                     </span><span class="c1">//         |     |            |</span>
+<span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">"{}"</span><span class="p">,</span><span class="w"> </span><span class="n">r2</span><span class="p">);</span><span class="w">              </span><span class="c1">//         |     |            |</span>
+<span class="w">                                     </span><span class="c1">//         |     |            |</span>
+<span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">"{}"</span><span class="p">,</span><span class="w"> </span><span class="n">r1</span><span class="p">);</span><span class="w">              </span><span class="c1">//  -------+-----+            |</span>
+<span class="w">                                     </span><span class="c1">//         |                  |</span>
+<span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">"{}"</span><span class="p">,</span><span class="w"> </span><span class="n">r2</span><span class="p">);</span><span class="w">              </span><span class="c1">//  -------+                  |</span>
+<span class="p">}</span><span class="w">                                    </span><span class="c1">//  --------------------------+</span>
+</pre></div>
+</div>
+<div class="highlight-rust notranslate"><div class="highlight"><pre><span></span>fn main() {
+    let mut x = 100;                 //  --------------------------+ x
+                                     //                            |
+                                     //                            |
+    let r1 = &amp;mut x;                 //  -------------+ r1         |
+             --- borrow of `*r1` occurs here          |            |
+    let r2 = &amp;r1;                    //  -------+ r2  |            |
+                                     //         |     |            |
+    *r1 = 10;                        //         |     |            |
+     ^^^^^^^^ assignment to borrowed `*r1` occurs here|            |
+    println!("{}", r1);              //  -------+-----+            |
+                                     //         |                  |
+    println!("{}", r2);              //  -------+                  |
+}                  -- borrow later used here ----------------------+
+
+</pre></div>
+</div>
+<p>上面这种情况，可以看出是 在 r2 的lifetime内，其原始值 r1 不能变。与第一种case类似。移除最后一行对 r2 的访问，就能编译通过。</p>
+</div>
+</div>
+</div>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          <a class="next-page" href="02-rust-ownership-copy-move-clone-borrow.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title">浅析Rust所有权Ownership (二) – Copy Move Clone 与 Borrow</div>
+              </div>
+              <svg><use href="#svg-arrow-right"></use></svg>
+            </a>
+          <a class="prev-page" href="index.html">
+              <svg><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">Home</div>
+                
+              </div>
+            </a>
+        </div>
+
+        <div class="related-information">
+              Copyright &#169; 2021, rsj217 |
+          Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+          <a href="https://github.com/pradyunsg/furo">Furo theme</a>.
+            | <a class="muted-link" href="../_sources/home/03-rust-lifetime-borrow.md.txt"
+               rel="nofollow">
+              显示源代码
+            </a>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            目录
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">浅析 Rust 生存期 Lifetime – 借用 borrow</a><ul>
+<li><a class="reference internal" href="#id1">原始者与借用者</a></li>
+<li><a class="reference internal" href="#id2">值存活期和生存期</a></li>
+<li><a class="reference internal" href="#id3">借用规则</a><ul>
+<li><a class="reference internal" href="#lifetime">借用的lifetime，不可超出其所有者的作用域</a></li>
+<li><a class="reference internal" href="#id4">共享借用的lifetime内，所有者暂时不可变</a></li>
+<li><a class="reference internal" href="#id5">独占引用的原始值，必须是可变的</a></li>
+<li><a class="reference internal" href="#id6">独占借用的lifetime内，所有者被冻结，不能读也不能写</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </aside>
+  </div>
+</div><script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/scripts/furo.js"></script>
+    <script src="../_static/translations.js"></script>
+    </body>
+</html>
