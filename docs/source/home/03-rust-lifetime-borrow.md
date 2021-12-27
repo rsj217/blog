@@ -103,7 +103,7 @@ fn main() {
  //  - `x` dropped here while still borrowed
                              //              |
     println!("{}", r);       //  ------------+
-                   - borrow later used here
+ //                - borrow later used here
 }
 ```
 
@@ -120,9 +120,9 @@ fn main() {
     x = 10;                          //                           |
     println!("{}", x);               //                           |
                                      //                           |
-    let r1 = &x;        			 //  ------------+ r1         |
+    let r1 = &x;                     //  ------------+ r1         |
                                      //                           |
-    x = 100;						 //                           |
+    x = 100;                         //                           |
                                      //                           |
     println!("{}", x);               //  -------------------------+
 }
@@ -157,11 +157,11 @@ fn main() {
     println!("{}", x);               //                           |
                                      //                           |
     let r1 = &x;                     //  ------------+ r1         |
-             -- immutable borrow occurs here         |            |
+//           -- immutable borrow occurs here         |            |
     let r2 = &mut x;                 //              |            |
-             ^^^^^^ mutable borrow occurs here       |            |
+//           ^^^^^^ mutable borrow occurs here       |            |
     println!("{}", r1);              //  ------------+            |
-                   -- immutable borrow later used here            |
+//                 -- immutable borrow later used here            |
     println!("{}", x);               //  -------------------------+
 }
 ```
@@ -175,7 +175,7 @@ fn main() {
     let x = 100;
 
     let r1 = &mut x;
-             ^^^^^^ cannot borrow as mutable
+          // ^^^^^^ cannot borrow as mutable
 }
 ```
 
@@ -207,7 +207,7 @@ fn main() {
     let r1 = &mut x;                 //  ------------+ r1         |
                                      //                           |
     println!("{}", x);               //                           |
-    x = 10;						     //                           |
+    x = 10;                          //                           |
                                      //                           |
     println!("{}", x);               //                           |
 }                                    //  -------------------------+
@@ -222,13 +222,13 @@ fn main() {
     println!("{}", x);               //                           |
                                      //                           |
     let r1 = &mut x;                 //  -------------+ r1        |
-             ------ mutable borrow occurs here        |           |
+//           ------ mutable borrow occurs here        |           |
                                      //               |           |
     println!("{}", x);               //               |           |
-                   ^ immutable borrow occurs here     |           |
+//                 ^ immutable borrow occurs here     |           |
                                      //               |           |
     println!("{}", r1);              //  -------------+           |
-                   -- mutable borrow later used here              |
+//                 -- mutable borrow later used here              |
 }                                    //  -------------------------+
 
 ```
@@ -242,7 +242,7 @@ fn main() {
     x = 10;                          //                            |
     println!("{}", x);               //                            |
                                      //                            |
-    let r1 = &mut x;                 //  -------------+ r1 = 'a    |
+    let r1 = &mut x;                 //  -------------+ r1         |
                                      //               |            |
                                      //               |            |
     println!("{}", r1);              //  -------------+            |
@@ -263,11 +263,11 @@ fn main() {
                                      //                            |
                                      //                            |
     let r1 = &mut x;                 //  -------------+ r1         |
-             ------ mutable borrow occurs here        |            |
+ //          ------ mutable borrow occurs here        |            |
     let r2 = &x;                     //               |            |
-             ^^ immutable borrow occurs here          |            |
+ //          ^^ immutable borrow occurs here          |            |
     println!("{}", r1);              //  -------------+            |
-                   -- mutable borrow later used here               |
+ //                -- mutable borrow later used here               |
 }                                    //  --------------------------+
 
 ```
@@ -322,7 +322,7 @@ fn main() {
     let r2 = &r1;                    //  -------+ r2  |            |
                                      //         |     |            |
     *r1 = 10;                        //         |     |            |
-//  ^^^^^^^^ assignment to borrowed `*r1` occurs here|            |
+//  ^^^^^^^^ assignment to borrowed `*r1` occurs here |            |
     println!("{}", r1);              //  -------+-----+            |
                                      //         |                  |
     println!("{}", r2);              //  -------+                  |

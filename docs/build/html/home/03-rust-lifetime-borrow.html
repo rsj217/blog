@@ -277,7 +277,7 @@
 <span class="w"> </span><span class="c1">//  - `x` dropped here while still borrowed</span>
 <span class="w">                             </span><span class="c1">//              |</span>
 <span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">"{}"</span><span class="p">,</span><span class="w"> </span><span class="n">r</span><span class="p">);</span><span class="w">       </span><span class="c1">//  ------------+</span>
-<span class="w">                   </span><span class="o">-</span><span class="w"> </span><span class="n">borrow</span><span class="w"> </span><span class="n">later</span><span class="w"> </span><span class="n">used</span><span class="w"> </span><span class="n">here</span><span class="w"></span>
+<span class="w"> </span><span class="c1">//                - borrow later used here</span>
 <span class="p">}</span><span class="w"></span>
 </pre></div>
 </div>
@@ -292,9 +292,9 @@
 <span class="w">    </span><span class="n">x</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">10</span><span class="p">;</span><span class="w">                          </span><span class="c1">//                           |</span>
 <span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">"{}"</span><span class="p">,</span><span class="w"> </span><span class="n">x</span><span class="p">);</span><span class="w">               </span><span class="c1">//                           |</span>
 <span class="w">                                     </span><span class="c1">//                           |</span>
-<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">r1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">&amp;</span><span class="n">x</span><span class="p">;</span><span class="w">        			 </span><span class="c1">//  ------------+ r1         |</span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">r1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">&amp;</span><span class="n">x</span><span class="p">;</span><span class="w">                     </span><span class="c1">//  ------------+ r1         |</span>
 <span class="w">                                     </span><span class="c1">//                           |</span>
-<span class="w">    </span><span class="n">x</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">100</span><span class="p">;</span><span class="w">						 </span><span class="c1">//                           |</span>
+<span class="w">    </span><span class="n">x</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">100</span><span class="p">;</span><span class="w">                         </span><span class="c1">//                           |</span>
 <span class="w">                                     </span><span class="c1">//                           |</span>
 <span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">"{}"</span><span class="p">,</span><span class="w"> </span><span class="n">x</span><span class="p">);</span><span class="w">               </span><span class="c1">//  -------------------------+</span>
 <span class="p">}</span><span class="w"></span>
@@ -326,11 +326,11 @@
 <span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">"{}"</span><span class="p">,</span><span class="w"> </span><span class="n">x</span><span class="p">);</span><span class="w">               </span><span class="c1">//                           |</span>
 <span class="w">                                     </span><span class="c1">//                           |</span>
 <span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">r1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">&amp;</span><span class="n">x</span><span class="p">;</span><span class="w">                     </span><span class="c1">//  ------------+ r1         |</span>
-<span class="w">             </span><span class="o">--</span><span class="w"> </span><span class="n">immutable</span><span class="w"> </span><span class="n">borrow</span><span class="w"> </span><span class="n">occurs</span><span class="w"> </span><span class="n">here</span><span class="w">         </span><span class="o">|</span><span class="w">            </span><span class="o">|</span><span class="w"></span>
+<span class="c1">//           -- immutable borrow occurs here         |            |</span>
 <span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">r2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="n">x</span><span class="p">;</span><span class="w">                 </span><span class="c1">//              |            |</span>
-<span class="w">             </span><span class="o">^^^^^^</span><span class="w"> </span><span class="n">mutable</span><span class="w"> </span><span class="n">borrow</span><span class="w"> </span><span class="n">occurs</span><span class="w"> </span><span class="n">here</span><span class="w">       </span><span class="o">|</span><span class="w">            </span><span class="o">|</span><span class="w"></span>
+<span class="c1">//           ^^^^^^ mutable borrow occurs here       |            |</span>
 <span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">"{}"</span><span class="p">,</span><span class="w"> </span><span class="n">r1</span><span class="p">);</span><span class="w">              </span><span class="c1">//  ------------+            |</span>
-<span class="w">                   </span><span class="o">--</span><span class="w"> </span><span class="n">immutable</span><span class="w"> </span><span class="n">borrow</span><span class="w"> </span><span class="n">later</span><span class="w"> </span><span class="n">used</span><span class="w"> </span><span class="n">here</span><span class="w">            </span><span class="o">|</span><span class="w"></span>
+<span class="c1">//                 -- immutable borrow later used here            |</span>
 <span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">"{}"</span><span class="p">,</span><span class="w"> </span><span class="n">x</span><span class="p">);</span><span class="w">               </span><span class="c1">//  -------------------------+</span>
 <span class="p">}</span><span class="w"></span>
 </pre></div>
@@ -343,7 +343,7 @@
 <span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">100</span><span class="p">;</span><span class="w"></span>
 
 <span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">r1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="n">x</span><span class="p">;</span><span class="w"></span>
-<span class="w">             </span><span class="o">^^^^^^</span><span class="w"> </span><span class="n">cannot</span><span class="w"> </span><span class="n">borrow</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">mutable</span><span class="w"></span>
+<span class="w">          </span><span class="c1">// ^^^^^^ cannot borrow as mutable</span>
 <span class="p">}</span><span class="w"></span>
 </pre></div>
 </div>
@@ -371,7 +371,7 @@
 <span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">r1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="n">x</span><span class="p">;</span><span class="w">                 </span><span class="c1">//  ------------+ r1         |</span>
 <span class="w">                                     </span><span class="c1">//                           |</span>
 <span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">"{}"</span><span class="p">,</span><span class="w"> </span><span class="n">x</span><span class="p">);</span><span class="w">               </span><span class="c1">//                           |</span>
-<span class="w">    </span><span class="n">x</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">10</span><span class="p">;</span><span class="w">						     </span><span class="c1">//                           |</span>
+<span class="w">    </span><span class="n">x</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">10</span><span class="p">;</span><span class="w">                          </span><span class="c1">//                           |</span>
 <span class="w">                                     </span><span class="c1">//                           |</span>
 <span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">"{}"</span><span class="p">,</span><span class="w"> </span><span class="n">x</span><span class="p">);</span><span class="w">               </span><span class="c1">//                           |</span>
 <span class="p">}</span><span class="w">                                    </span><span class="c1">//  -------------------------+</span>
@@ -385,13 +385,13 @@
 <span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">"{}"</span><span class="p">,</span><span class="w"> </span><span class="n">x</span><span class="p">);</span><span class="w">               </span><span class="c1">//                           |</span>
 <span class="w">                                     </span><span class="c1">//                           |</span>
 <span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">r1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="n">x</span><span class="p">;</span><span class="w">                 </span><span class="c1">//  -------------+ r1        |</span>
-<span class="w">             </span><span class="o">------</span><span class="w"> </span><span class="n">mutable</span><span class="w"> </span><span class="n">borrow</span><span class="w"> </span><span class="n">occurs</span><span class="w"> </span><span class="n">here</span><span class="w">        </span><span class="o">|</span><span class="w">           </span><span class="o">|</span><span class="w"></span>
+<span class="c1">//           ------ mutable borrow occurs here        |           |</span>
 <span class="w">                                     </span><span class="c1">//               |           |</span>
 <span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">"{}"</span><span class="p">,</span><span class="w"> </span><span class="n">x</span><span class="p">);</span><span class="w">               </span><span class="c1">//               |           |</span>
-<span class="w">                   </span><span class="o">^</span><span class="w"> </span><span class="n">immutable</span><span class="w"> </span><span class="n">borrow</span><span class="w"> </span><span class="n">occurs</span><span class="w"> </span><span class="n">here</span><span class="w">     </span><span class="o">|</span><span class="w">           </span><span class="o">|</span><span class="w"></span>
+<span class="c1">//                 ^ immutable borrow occurs here     |           |</span>
 <span class="w">                                     </span><span class="c1">//               |           |</span>
 <span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">"{}"</span><span class="p">,</span><span class="w"> </span><span class="n">r1</span><span class="p">);</span><span class="w">              </span><span class="c1">//  -------------+           |</span>
-<span class="w">                   </span><span class="o">--</span><span class="w"> </span><span class="n">mutable</span><span class="w"> </span><span class="n">borrow</span><span class="w"> </span><span class="n">later</span><span class="w"> </span><span class="n">used</span><span class="w"> </span><span class="n">here</span><span class="w">              </span><span class="o">|</span><span class="w"></span>
+<span class="c1">//                 -- mutable borrow later used here              |</span>
 <span class="p">}</span><span class="w">                                    </span><span class="c1">//  -------------------------+</span>
 </pre></div>
 </div>
@@ -402,7 +402,7 @@
 <span class="w">    </span><span class="n">x</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">10</span><span class="p">;</span><span class="w">                          </span><span class="c1">//                            |</span>
 <span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">"{}"</span><span class="p">,</span><span class="w"> </span><span class="n">x</span><span class="p">);</span><span class="w">               </span><span class="c1">//                            |</span>
 <span class="w">                                     </span><span class="c1">//                            |</span>
-<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">r1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="n">x</span><span class="p">;</span><span class="w">                 </span><span class="c1">//  -------------+ r1 = 'a    |</span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">r1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="n">x</span><span class="p">;</span><span class="w">                 </span><span class="c1">//  -------------+ r1         |</span>
 <span class="w">                                     </span><span class="c1">//               |            |</span>
 <span class="w">                                     </span><span class="c1">//               |            |</span>
 <span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">"{}"</span><span class="p">,</span><span class="w"> </span><span class="n">r1</span><span class="p">);</span><span class="w">              </span><span class="c1">//  -------------+            |</span>
@@ -418,11 +418,11 @@
 <span class="w">                                     </span><span class="c1">//                            |</span>
 <span class="w">                                     </span><span class="c1">//                            |</span>
 <span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">r1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="n">x</span><span class="p">;</span><span class="w">                 </span><span class="c1">//  -------------+ r1         |</span>
-<span class="w">             </span><span class="o">------</span><span class="w"> </span><span class="n">mutable</span><span class="w"> </span><span class="n">borrow</span><span class="w"> </span><span class="n">occurs</span><span class="w"> </span><span class="n">here</span><span class="w">        </span><span class="o">|</span><span class="w">            </span><span class="o">|</span><span class="w"></span>
+<span class="w"> </span><span class="c1">//          ------ mutable borrow occurs here        |            |</span>
 <span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">r2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">&amp;</span><span class="n">x</span><span class="p">;</span><span class="w">                     </span><span class="c1">//               |            |</span>
-<span class="w">             </span><span class="o">^^</span><span class="w"> </span><span class="n">immutable</span><span class="w"> </span><span class="n">borrow</span><span class="w"> </span><span class="n">occurs</span><span class="w"> </span><span class="n">here</span><span class="w">          </span><span class="o">|</span><span class="w">            </span><span class="o">|</span><span class="w"></span>
+<span class="w"> </span><span class="c1">//          ^^ immutable borrow occurs here          |            |</span>
 <span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">"{}"</span><span class="p">,</span><span class="w"> </span><span class="n">r1</span><span class="p">);</span><span class="w">              </span><span class="c1">//  -------------+            |</span>
-<span class="w">                   </span><span class="o">--</span><span class="w"> </span><span class="n">mutable</span><span class="w"> </span><span class="n">borrow</span><span class="w"> </span><span class="n">later</span><span class="w"> </span><span class="n">used</span><span class="w"> </span><span class="n">here</span><span class="w">               </span><span class="o">|</span><span class="w"></span>
+<span class="w"> </span><span class="c1">//                -- mutable borrow later used here               |</span>
 <span class="p">}</span><span class="w">                                    </span><span class="c1">//  --------------------------+</span>
 </pre></div>
 </div>
@@ -469,7 +469,7 @@
 <span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">r2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">&amp;</span><span class="n">r1</span><span class="p">;</span><span class="w">                    </span><span class="c1">//  -------+ r2  |            |</span>
 <span class="w">                                     </span><span class="c1">//         |     |            |</span>
 <span class="w">    </span><span class="o">*</span><span class="n">r1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">10</span><span class="p">;</span><span class="w">                        </span><span class="c1">//         |     |            |</span>
-<span class="c1">//  ^^^^^^^^ assignment to borrowed `*r1` occurs here|            |</span>
+<span class="c1">//  ^^^^^^^^ assignment to borrowed `*r1` occurs here |            |</span>
 <span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">"{}"</span><span class="p">,</span><span class="w"> </span><span class="n">r1</span><span class="p">);</span><span class="w">              </span><span class="c1">//  -------+-----+            |</span>
 <span class="w">                                     </span><span class="c1">//         |                  |</span>
 <span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">"{}"</span><span class="p">,</span><span class="w"> </span><span class="n">r2</span><span class="p">);</span><span class="w">              </span><span class="c1">//  -------+                  |</span>
